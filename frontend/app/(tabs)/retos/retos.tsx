@@ -20,6 +20,20 @@ interface Challenge {
   invite_code?: string;
 }
 
+type EstadoMision = "assigned" | "completed" | "available";
+
+const titleMap: Record<EstadoMision, string> = {
+  assigned: "\ud83d\udccb Misiones pendientes",
+  completed: "\u2705 Misiones completadas",
+  available: "\ud83c\udf1f Misiones disponibles",
+};
+
+const colorMap: Record<EstadoMision, string> = {
+  assigned: "#fef9c3",
+  completed: "#dcfce7",
+  available: "#e0f2fe",
+};
+
 export default function Retos() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
@@ -60,7 +74,7 @@ export default function Retos() {
       const missionsData = await resMissions.json();
       setMissions(missionsData);
     } catch (err) {
-      console.error("❌ Error al cargar reto:", err);
+      console.error("\u274c Error al cargar reto:", err);
       Alert.alert("Error", "No se pudo cargar el reto.");
     } finally {
       setLoading(false);
@@ -69,8 +83,8 @@ export default function Retos() {
 
   const eliminarReto = async () => {
     Alert.alert(
-      "¿Eliminar reto?",
-      "Esto borrará tu participación en el reto actual.",
+      "\u00bfEliminar reto?",
+      "Esto borrar\u00e1 tu participaci\u00f3n en el reto actual.",
       [
         { text: "Cancelar", style: "cancel" },
         {
@@ -81,9 +95,9 @@ export default function Retos() {
               await apiFetch("/group-challenges/active", { method: "DELETE" });
               setChallenge(null);
               setMissions([]);
-              Alert.alert("Reto eliminado", "Puedes crear uno nuevo desde la pestaña de crear.");
+              Alert.alert("Reto eliminado", "Puedes crear uno nuevo desde la pesta\u00f1a de crear.");
             } catch (err) {
-              console.error("❌ Error al eliminar reto:", err);
+              console.error("\u274c Error al eliminar reto:", err);
               Alert.alert("Error", "No se pudo eliminar el reto.");
             }
           },
@@ -93,17 +107,13 @@ export default function Retos() {
   };
 
   const dificultadLabel = (d: number) => {
-    if (d <= 1) return "Fácil";
+    if (d <= 1) return "F\u00e1cil";
     if (d === 3) return "Media";
-    return "Difícil";
+    return "Dif\u00edcil";
   };
 
   return (
-    <ImageBackground
-      source={require("../../../assets/images/fondo.png")}
-      style={{ flex: 1 }}
-      resizeMode="cover"
-    >
+    <ImageBackground source={require("../../../assets/images/fondo.png")} style={{ flex: 1 }} resizeMode="cover">
       <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 60 }}>
         {loading ? (
           <View className="items-center justify-center mt-10">
@@ -114,53 +124,61 @@ export default function Retos() {
           <>
             <View className="bg-white/80 p-4 rounded-2xl shadow-md mb-6">
               <Text className="text-black text-xl font-bold mb-1">{challenge.title}</Text>
-              <Text className="text-black text-sm mb-2">
-                Iniciado: {new Date(challenge.created_at).toLocaleDateString()}
-              </Text>
+              <Text className="text-black text-sm mb-2">Iniciado: {new Date(challenge.created_at).toLocaleDateString()}</Text>
 
               {!challenge.is_solo && challenge.invite_code && (
-                <TouchableOpacity
-                  onPress={() =>
-                    Alert.alert("Código de invitación", `🔗 ${challenge.invite_code}`)
-                  }
-                  className="bg-[#699D81] rounded-lg px-4 py-2 mt-2 self-start"
-                >
-                  <Text className="text-white font-semibold">👥 Invitar amigos al reto</Text>
+                <TouchableOpacity onPress={() => Alert.alert("C\u00f3digo de invitaci\u00f3n", `\ud83d\udd17 ${challenge.invite_code}`)} className="bg-[#699D81] rounded-lg px-4 py-2 mt-2 self-start">
+                  <Text className="text-white font-semibold">\ud83d\udc65 Invitar amigos al reto</Text>
                 </TouchableOpacity>
               )}
 
-              <TouchableOpacity
-                onPress={eliminarReto}
-                className="bg-red-500 rounded-lg px-4 py-2 mt-2 self-start"
-              >
-                <Text className="text-white font-semibold">❌ Eliminar reto</Text>
+              <TouchableOpacity onPress={eliminarReto} className="bg-red-500 rounded-lg px-4 py-2 mt-2 self-start">
+                <Text className="text-white font-semibold">\u274c Eliminar reto</Text>
               </TouchableOpacity>
             </View>
 
-            <View className="space-y-4">
-              {missions.map((mission) => (
-                <View key={mission.id} className="bg-white/90 p-4 rounded-xl shadow-md">
-                  <Text className="text-black font-bold text-base mb-1">{mission.title}</Text>
-                  <Text className="text-black/70 text-sm mb-2">{mission.description}</Text>
-                  <Text className="text-black/60 text-sm">
-                    Dificultad: {dificultadLabel(mission.difficulty)} • Estado:{" "}
-                    {mission.estado === "completed"
-                      ? "✅ Completada"
-                      : mission.estado === "assigned"
-                      ? "🕒 Asignada"
-                      : "🔓 Disponible"}
-                  </Text>
+            {(["assigned", "completed", "available"] as EstadoMision[]).map((estado) => {
+              const grupo = missions.filter((m) => m.estado === estado);
+              if (grupo.length === 0) return null;
+              return (
+                <View key={estado} className="mb-6">
+                  <Text className="text-black font-semibold text-base mb-2">{titleMap[estado]} ({grupo.length})</Text>
+                  {grupo.map((mission) => (
+                    <TouchableOpacity
+                      key={mission.id}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/(tabs)/retos/destallesReto",
+                          params: {
+                            challengeId: challenge.id,
+                            missionId: mission.id,
+                            title: mission.title,
+                            description: mission.description,
+                            difficulty: mission.difficulty,
+                            estado: mission.estado,
+                            user_id: mission.user_id,
+                          },
+                        })
+                      }
+                      className="rounded-xl p-4 mb-3"
+                      style={{ backgroundColor: colorMap[estado] }}
+                    >
+                      <Text className="text-black font-bold text-base mb-1">{mission.title}</Text>
+                      <Text className="text-black/70 text-sm mb-2">{mission.description}</Text>
+                      <Text className="text-black/60 text-sm">Dificultad: {dificultadLabel(mission.difficulty)}</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
-              ))}
-            </View>
+              );
+            })}
           </>
         ) : (
           <View className="bg-white/80 p-4 rounded-xl items-center justify-center">
             <Text className="text-black text-lg text-center font-semibold mb-2">
-              No tienes ningún reto activo.
+              No tienes ning\u00fan reto activo.
             </Text>
             <Text className="text-black/60 text-sm text-center">
-              Crea un nuevo reto desde la pestaña de "Crear".
+              Crea un nuevo reto desde la pesta\u00f1a de "Crear".
             </Text>
           </View>
         )}

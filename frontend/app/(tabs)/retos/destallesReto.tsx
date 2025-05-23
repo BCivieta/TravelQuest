@@ -41,7 +41,7 @@ export default function CompletarMisionGrupo() {
       });
       if (!res.ok) throw new Error("No se pudo asignar la misión");
       Alert.alert("✅ Misión asignada");
-      router.back();
+      router.push("/(tabs)/retos/retos");
     } catch (err) {
       console.error(err);
       Alert.alert("Error al asignar la misión");
@@ -87,7 +87,7 @@ export default function CompletarMisionGrupo() {
       if (!patchRes.ok) throw new Error("No se pudo completar la misión");
 
       Alert.alert("✅ Misión completada");
-      router.replace("./retos/detallesReto");
+      router.replace("./(tabs)/retos/retos");
     } catch (err) {
       console.error(err);
       Alert.alert("Error al enviar la misión");
