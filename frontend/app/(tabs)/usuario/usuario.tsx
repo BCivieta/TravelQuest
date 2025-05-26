@@ -137,6 +137,14 @@ export default function Usuario() {
               icon: "🌍"
             },
             {
+              id: "2",
+              title: "Trotamundos",
+              description: "Explora 5 ciudades distintas",
+              category: "exploración",
+              points: 50,
+              icon: "🌍"
+            },
+            {
               id: "5",
               title: "Primer paso",
               description: "Completa tu primera misión",

@@ -12,11 +12,11 @@ import locationRoutes from './routes/locationRoutes.js';
 import mensajeRoutes from './routes/mensajeRoutes.js';
 import misionesRoutes from './routes/misionRoutes.js';
 import rankingRoutes from './routes/rankingroutes.js';
-import imageRoutes from './routes/imageRoutes.js';
+import imageRoutes from './routes/imageroutes.js';
 import viajeRoutes from './routes/viajeRoutes.js';
 import chatRoutes from './routes/chat.js';
 import authRoutes from './routes/auth.js';
-import ajustesRoutes from './routes/ajustesRoutes.js';
+import ajustesRoutes from './routes/ajustesroutes.js';
 import logroRoutes from './routes/logroRoutes.js';
 
 dotenv.config();

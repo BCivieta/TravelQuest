@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "1bcf855d-e55d-4bac-a4c1-6f1ce15a1a5b"
+      }
+    },
+    "android": {
+      "package": "com.ivangallego13.travelquest"
+    }
+  }
+}

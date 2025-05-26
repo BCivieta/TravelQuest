@@ -2,11 +2,12 @@ import { supabase } from '../config/supabaseClient.js';
 import { updateUserLevel } from './usercontroller.js';
 
 // Define achievement types
+// Update the LOGROS object to remove the unwanted achievements
 export const LOGROS = {
   PRIMERA_CIUDAD: 'primera_ciudad',
   TROTAMUNDOS: 'trotamundos',
-  CIUDADANO_MUNDO: 'ciudadano_mundo',
-  MAPA_COMPLETO: 'mapa_completo',
+  // Removed: CIUDADANO_MUNDO: 'ciudadano_mundo',
+  // Removed: MAPA_COMPLETO: 'mapa_completo',
   PRIMERA_MISION: 'primera_mision',
   MISION_FACIL: 'mision_facil',
   MISION_MEDIA: 'mision_media',
@@ -38,214 +39,117 @@ export const getUserAchievements = async (userId) => {
 /**
  * Check and award achievements for a user
  */
-/**
- * Checks and awards achievements for a user based on an action
- * @param {string} userId - The user ID
- * @param {string} action - The action that triggered the achievement check
- * @returns {Promise<{newAchievements: Array, pointsEarned: number}>}
- */
-export const checkAndAwardAchievements = async (userId, action = 'CHECK_MISSIONS') => {
+export const checkAndAwardAchievements = async (userId, trigger = 'GENERAL') => {
   try {
-    console.log(`🏆 Verificando logros para usuario ${userId} por acción: ${action}`);
+    console.log(`🏆 Checking achievements for user ${userId}, trigger: ${trigger}`);
     
-    if (!userId) {
-      throw new Error("Se requiere ID de usuario para verificar logros");
-    }
-    
-    // Get all achievements
-    const { data: allAchievements, error: achievementsError } = await supabase
-      .from('achievements')
-      .select('*');
+    // Get user's unlocked achievements
+    const { data: userAchievements, error: achievementsError } = await supabase
+      .from('user_achievements')
+      .select('achievement_id')
+      .eq('user_id', userId);
       
     if (achievementsError) throw achievementsError;
     
-    // Get user's current achievements
-    const { data: userAchievements, error: userAchievementsError } = await supabase
-      .from('user_achievements')
-      .select('achievement_id, unlocked_at')
-      .eq('user_id', userId);
+    // Get all available achievements
+    const { data: allAchievements, error: allAchievementsError } = await supabase
+      .from('achievements')
+      .select('*');
       
-    if (userAchievementsError) throw userAchievementsError;
+    if (allAchievementsError) throw allAchievementsError;
     
-    // Get user's completed missions
-    const { data: completedMissions, error: missionsError } = await supabase
-      .from('user_missions')
-      .select('mission_id, missions(city_id, difficulty)')
-      .eq('user_id', userId)
-      .eq('status', 'completed');
-      
-    if (missionsError) throw missionsError;
+    // Get unlocked achievement IDs
+    const unlockedAchievementIds = userAchievements.map(a => a.achievement_id);
     
-    // Get user profile for current points
-    const { data: userProfile, error: profileError } = await supabase
-      .from('profiles')
-      .select('points, level')
-      .eq('id', userId)
-      .single();
-      
-    if (profileError) throw profileError;
-    
-    // Extract IDs of achievements the user already has
-    const userAchievementIds = userAchievements.map(a => a.achievement_id);
-    
-    // Filter achievements that the user doesn't have yet
-    const availableAchievements = allAchievements.filter(
-      achievement => !userAchievementIds.includes(achievement.id)
-    );
-    
-    // Check each achievement condition
-    const newlyUnlockedAchievements = [];
+    // Track newly awarded achievements
+    const newAchievements = [];
     let totalPointsEarned = 0;
     
-    // Count missions by difficulty
-    const easyMissions = completedMissions.filter(m => m.missions?.difficulty === 'facil').length;
-    const mediumMissions = completedMissions.filter(m => m.missions?.difficulty === 'media').length;
-    const hardMissions = completedMissions.filter(m => m.missions?.difficulty === 'dificil').length;
-    
-    // Get unique cities from completed missions
-    const visitedCities = new Set(
-      completedMissions
-        .map(m => m.missions?.city_id)
-        .filter(Boolean)
-    );
-    
-    for (const achievement of availableAchievements) {
-      let unlocked = false;
-      
-      // Check different achievement types
-      switch (achievement.condition_type) {
-        case 'COMPLETE_FIRST_MISSION':
-          unlocked = completedMissions.length > 0;
-          break;
-          
-        case 'COMPLETE_N_MISSIONS':
-          unlocked = completedMissions.length >= achievement.condition_value;
-          break;
-          
-        case 'VISIT_N_CITIES':
-          unlocked = visitedCities.size >= achievement.condition_value;
-          break;
-          
-        case 'REACH_LEVEL':
-          unlocked = userProfile.level >= achievement.condition_value;
-          break;
-          
-        case 'COMPLETE_EASY_MISSION':
-          unlocked = easyMissions > 0;
-          break;
-          
-        case 'COMPLETE_MEDIUM_MISSION':
-          unlocked = mediumMissions > 0;
-          break;
-          
-        case 'COMPLETE_HARD_MISSION':
-          unlocked = hardMissions > 0;
-          break;
-          
-        case 'COMPLETE_CITY_MISSIONS':
-          // Check if any city has all its missions completed
-          if (visitedCities.size > 0) {
-            for (const cityId of visitedCities) {
-              // Get all missions for this city
-              const { data: cityMissions, error: cityError } = await supabase
-                .from('missions')
-                .select('id')
-                .eq('city_id', cityId);
-                
-              if (cityError) {
-                console.error(`Error getting missions for city ${cityId}:`, cityError);
-                continue;
-              }
-              
-              // Get completed missions for this city
-              const cityMissionIds = cityMissions.map(m => m.id);
-              const completedCityMissions = completedMissions
-                .filter(m => cityMissionIds.includes(m.mission_id))
-                .length;
-                
-              // If all missions for this city are completed, unlock the achievement
-              if (completedCityMissions === cityMissions.length && cityMissions.length > 0) {
-                unlocked = true;
-                break;
-              }
-            }
-          }
-          break;
-          
-        // Add more achievement types as needed
-        // You can also check by code if needed
-        default:
-          // Check by code if condition_type is not recognized
-          if (achievement.code === 'primera_mision') {
-            unlocked = completedMissions.length > 0;
-          } else if (achievement.code === 'mision_facil') {
-            unlocked = easyMissions > 0;
-          } else if (achievement.code === 'mision_media') {
-            unlocked = mediumMissions > 0;
-          } else if (achievement.code === 'mision_dificil') {
-            unlocked = hardMissions > 0;
-          } else if (achievement.code === 'primera_ciudad') {
-            unlocked = visitedCities.size > 0;
-          } else if (achievement.code === 'trotamundos') {
-            unlocked = visitedCities.size >= 5;
-          } else if (achievement.code === 'ciudadano_mundo') {
-            unlocked = visitedCities.size >= 15;
-          } else if (achievement.code === 'diez_misiones') {
-            unlocked = completedMissions.length >= 10;
-          } else if (achievement.code === 'cien_misiones') {
-            unlocked = completedMissions.length >= 100;
-          }
-          break;
-      }
-      
-      // If achievement is unlocked, add it to the user's achievements
-      if (unlocked) {
-        const now = new Date().toISOString();
-        
-        const { error: insertError } = await supabase
-          .from('user_achievements')
-          .insert({
-            user_id: userId,
-            achievement_id: achievement.id,
-            unlocked_at: now
-          });
-          
-        if (insertError) {
-          console.error(`Error al guardar logro ${achievement.id}:`, insertError);
-          continue; // Skip this achievement if there's an error
-        }
-        
-        // Add points to user
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ 
-            points: userProfile.points + achievement.points 
-          })
-          .eq('id', userId);
-          
-        if (updateError) {
-          console.error('Error al actualizar puntos:', updateError);
-        } else {
-          totalPointsEarned += achievement.points;
-        }
-        
-        // Add to newly unlocked achievements
-        newlyUnlockedAchievements.push(achievement);
-      }
-    }
-    
-    console.log(`✅ Verificación completada. Nuevos logros: ${newlyUnlockedAchievements.length}, Puntos: ${totalPointsEarned}`);
-    
-    return {
-      newAchievements: newlyUnlockedAchievements,
-      pointsEarned: totalPointsEarned
+    // Helper function to add points
+    const addPoints = (points) => {
+      totalPointsEarned += points;
     };
     
+    // Check city-related achievements
+    await checkCityAchievements(userId, unlockedAchievementIds, allAchievements, newAchievements, addPoints);
+    
+    // Check mission-related achievements
+    if (trigger === 'MISSION_COMPLETED' || trigger === 'CHECK_ALL') {
+      await checkMissionAchievements(userId, unlockedAchievementIds, allAchievements, newAchievements, addPoints);
+    }
+    
+    // Update user score if points were earned
+    if (totalPointsEarned > 0) {
+      await updateUserScore(userId, totalPointsEarned);
+    }
+    
+    return {
+      newAchievements,
+      pointsEarned: totalPointsEarned
+    };
   } catch (error) {
-    console.error('Error al verificar logros:', error);
+    console.error('Error checking achievements:', error);
     throw error;
   }
 };
+
+/**
+ * Check city-related achievements
+ */
+async function checkCityAchievements(userId, unlockedAchievementIds, allAchievements, newAchievements, addPoints) {
+  try {
+    // Get user's visited cities
+    const { data: userCities, error: citiesError } = await supabase
+      .from('user_cities')
+      .select('city_id')
+      .eq('user_id', userId);
+      
+    if (citiesError) throw citiesError;
+    
+    // Get the actual city data to verify they are real cities in our database
+    const cityIds = userCities.map(uc => uc.city_id);
+    
+    if (cityIds.length > 0) {
+      const { data: validCities, error: validCitiesError } = await supabase
+        .from('cities')
+        .select('id, name')
+        .in('id', cityIds);
+        
+      if (validCitiesError) throw validCitiesError;
+      
+      // Only count cities that actually exist in our database
+      const validCityIds = validCities.map(city => city.id);
+      const uniqueValidCityCount = new Set(validCityIds).size;
+      
+      console.log(`👤 User has visited ${uniqueValidCityCount} valid cities`);
+      
+      // Check "Primera parada" achievement - first city visited
+      await checkSingleAchievement(
+        LOGROS.PRIMERA_CIUDAD,
+        uniqueValidCityCount >= 1,
+        userId,
+        unlockedAchievementIds,
+        allAchievements,
+        newAchievements,
+        addPoints
+      );
+      
+      // Check "Trotamundos" achievement - 5 different cities
+      await checkSingleAchievement(
+        LOGROS.TROTAMUNDOS,
+        uniqueValidCityCount >= 5,
+        userId,
+        unlockedAchievementIds,
+        allAchievements,
+        newAchievements,
+        addPoints
+      );
+    }
+  } catch (error) {
+    console.error('Error checking city achievements:', error);
+    throw error;
+  }
+}
 
 /**
  * Check a single achievement and award it if conditions are met
