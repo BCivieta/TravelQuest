@@ -107,7 +107,6 @@ export const getCityFromName = async (req, res) => {
     }
 };
 
-<<<<<<< HEAD
 // Helper function to record city visit
 async function recordCityVisit(userId, cityId) {
     try {
@@ -142,7 +141,6 @@ async function recordCityVisit(userId, cityId) {
         throw error;
     }
 }
-=======
 // Guardar o actualizar la ubicación del usuario
 export const saveUserLocation = async (req, res) => {
   const { user_id, city_id } = req.body;
@@ -179,4 +177,3 @@ export const saveUserLocation = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
->>>>>>> origin/backendcore1

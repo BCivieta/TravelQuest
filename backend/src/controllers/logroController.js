@@ -1,5 +1,4 @@
 import { supabase } from '../config/supabaseClient.js';
-import { updateUserLevel } from './usercontroller.js';
 
 // Define achievement types
 // Update the LOGROS object to remove the unwanted achievements

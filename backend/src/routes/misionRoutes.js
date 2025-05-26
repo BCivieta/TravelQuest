@@ -7,7 +7,7 @@ import {
     getMissionHistory,
     checkUserAchievements // Fixed: removed nested import and added directly to the list
 } from '../controllers/misioncontroller.js';
-import { authMiddleware } from '../middleware/authmiddleware.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
