@@ -5,24 +5,25 @@ import fileUpload from 'express-fileupload';
 import { createClient } from '@supabase/supabase-js';
 
 // Rutas
-import userRoutes from './routes/userroutes.js';  // Changed casing to match actual file
+import userRoutes from './routes/userRoutes.js';
 import diarioRoutes from './routes/DiarioRoutes.js';
-import amigosRoutes from './routes/amigosRoutes.js';
+import amigosRoutes from './routes/AmigosRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
-import mensajeRoutes from './routes/mensajeRoutes.js';
+import mensajeRoutes from './routes/MensajeRoutes.js';
 import misionesRoutes from './routes/misionRoutes.js';
-import rankingRoutes from './routes/rankingroutes.js';
-import imageRoutes from './routes/imageroutes.js';
-import viajeRoutes from './routes/viajeRoutes.js';
+import rankingRoutes from './routes/RankingRoutes.js';
+import imageRoutes from './routes/imageRoutes.js';
+import viajeRoutes from './routes/ViajeRoutes.js';
 import chatRoutes from './routes/chat.js';
 import authRoutes from './routes/auth.js';
-import ajustesRoutes from './routes/ajustesroutes.js';
-import logroRoutes from './routes/logroRoutes.js';
+import ajustesRoutes from './routes/ajustesRoutes.js';
+import logrosRoutes from './routes/logrosRoutes.js';
+import travelDaysRoutes from './routes/travelDaysRoutes.js';
+import conversationRoutes from './routes/conversationRoutes.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Middlewares
 app.use(cors());
@@ -50,15 +51,32 @@ app.use('/api/viajes', viajeRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/ajustes', ajustesRoutes);
-// Mount the routes
-app.use('/api/logros', logroRoutes);
+app.use('/api/logros', logrosRoutes);
+app.use('/api/travel_days', travelDaysRoutes);
+app.use('/api/conversations', conversationRoutes);
 
 // Ruta raíz
 app.get('/', (req, res) => {
   res.send('🎒 API de Tu App de Viajes funcionando correctamente');
 });
 
-// Iniciar servidor
-app.listen(PORT, () => {
+// Iniciar servidor con manejo de errores para puerto ocupado
+const PORT = process.env.PORT || 3000;
+const server = app.listen(PORT, () => {
   console.log(`🌍 Servidor escuchando en http://localhost:${PORT}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    // Si el puerto está ocupado, intentar con puerto alternativo
+    const altPort = PORT + 1;
+    console.log(`⚠️ Puerto ${PORT} en uso. Intentando con puerto ${altPort}...`);
+    
+    app.listen(altPort, () => {
+      console.log(`🌍 Servidor escuchando en http://localhost:${altPort}`);
+    }).on('error', (altErr) => {
+      console.error(`❌ Error al iniciar el servidor en el puerto alternativo: ${altErr.message}`);
+      console.error('👉 Intenta detener otros servidores o especificar un puerto diferente con la variable PORT');
+    });
+  } else {
+    console.error(`❌ Error al iniciar el servidor: ${err.message}`);
+  }
 });

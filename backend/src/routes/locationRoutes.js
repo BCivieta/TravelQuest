@@ -1,8 +1,8 @@
 import express from 'express';
-import { getCityFromCoordinates, getCityFromName } from '../controllers/opcional/locationcontroller.js';
-import { authMiddleware } from '../middleware/authmiddleware.js';
+import { getCityFromCoordinates, getCityFromName, saveUserLocation } from '../controllers/opcional/locationcontroller.js';
 import { checkAndAwardAchievements } from '../controllers/logrocontroller.js';
 import { supabase } from '../config/supabaseClient.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -111,5 +111,7 @@ router.post('/check-city-achievements', authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Error al verificar logros de ciudades" });
   }
 });
+
+router.post('/user_location', saveUserLocation);
 
 export default router;

@@ -345,70 +345,82 @@ export default function Usuario() {
       style={{ flex: 1 }}
       resizeMode="cover"
     >
-      <View className="flex-1 px-6 pt-14">
-        {/* Cabecera con avatar, nombre y menú */}
-        <View className="flex-row justify-between items-center mb-6">
-          <View className="flex-row items-center space-x-4">
-            <Image
-              source={avatarUrl ? { uri: avatarUrl } : require("../../../assets/images/avatar.png")}
-              className="w-16 h-16 rounded-full"
-            />
-            <View>
-              <Text className="text-white text-lg font-bold ms-4">{username}</Text>
-              <Text className="text-white text-base ms-4">Nivel {score}</Text>
+      <View className="flex-1 bg-[#F4EDE0]">
+        {/* Cabecera con avatar y nombre */}
+        <View className="pt-14 pb-6 px-6 bg-white">
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center">
+              <View className="w-16 h-16 rounded-full mr-4 overflow-hidden bg-[#fff3e9] justify-center items-center">
+                {avatarUrl ? (
+                  <Image
+                    source={{ uri: avatarUrl }}
+                    className="w-16 h-16 rounded-full"
+                    defaultSource={require("../../../assets/images/avatar.png")}
+                  />
+                ) : (
+                  <Image
+                    source={require("../../../assets/images/avatar.png")}
+                    className="w-16 h-16 rounded-full"
+                  />
+                )}
+              </View>
+              <View>
+                <Text className="text-white text-lg font-bold ms-4">{username}</Text>
+                <Text className="text-white text-base ms-4">Nivel {score}</Text>
+              </View>
+            </View>
+
+            <View className="relative">
+              <TouchableOpacity
+                onPress={() => setMostrarMenu(!mostrarMenu)}
+                className="bg-white/80 rounded-full p-2 shadow-md"
+              >
+                <Ionicons name="ellipsis-vertical" size={22} color="#504382" />
+              </TouchableOpacity>
+
+              {mostrarMenu && (
+                <View className="absolute top-12 right-0 bg-white/90 rounded-2xl shadow-md z-10 w-56 overflow-hidden">
+                  <TouchableOpacity
+                    onPress={handleVerSobre}
+                    className="flex-row items-center px-4 py-3 border-b border-gray-200"
+                  >
+                    <Ionicons name="information-circle-outline" size={20} color="#000" />
+                    <Text className="text-black ml-2">Sobre TravelQuest</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleVereditar}
+                    className="flex-row items-center px-4 py-3 border-b border-gray-200"
+                  >
+                    <Ionicons name="person-outline" size={20} color="#000" />
+                    <Text className="text-black ml-2">Editar perfil</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleLogout}
+                    className="flex-row items-center px-4 py-3"
+                  >
+                    <Ionicons name="log-out-outline" size={20} color="#C76F40" />
+                    <Text className="text-[#C76F40] ml-2 font-semibold">Cerrar sesión</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </View>
 
-          <View className="relative">
+          {/* Botones de acción */}
+          <View className="flex-row justify-between mb-8">
             <TouchableOpacity
-              onPress={() => setMostrarMenu(!mostrarMenu)}
-              className="bg-white/80 rounded-full p-2 shadow-md"
+              onPress={handleVerRanking}
+              className="bg-white/90 px-6 py-3 rounded-2xl shadow-md flex-1 mr-2"
             >
-              <Ionicons name="ellipsis-vertical" size={22} color="#504382" />
+              <Text className="text-black font-bold text-center">🏆 Ver Ranking</Text>
             </TouchableOpacity>
-
-            {mostrarMenu && (
-              <View className="absolute top-12 right-0 bg-white/90 rounded-2xl shadow-md z-10 w-56 overflow-hidden">
-                <TouchableOpacity
-                  onPress={handleVerSobre}
-                  className="flex-row items-center px-4 py-3 border-b border-gray-200"
-                >
-                  <Ionicons name="information-circle-outline" size={20} color="#000" />
-                  <Text className="text-black ml-2">Sobre TravelQuest</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleVereditar}
-                  className="flex-row items-center px-4 py-3 border-b border-gray-200"
-                >
-                  <Ionicons name="person-outline" size={20} color="#000" />
-                  <Text className="text-black ml-2">Editar perfil</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleLogout}
-                  className="flex-row items-center px-4 py-3"
-                >
-                  <Ionicons name="log-out-outline" size={20} color="#C76F40" />
-                  <Text className="text-[#C76F40] ml-2 font-semibold">Cerrar sesión</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+            <TouchableOpacity
+              onPress={handleVerMisiones}
+              className="bg-white/90 px-6 py-3 rounded-2xl shadow-md flex-1 ml-2"
+            >
+              <Text className="text-black font-bold text-center">🧭 Ver Misiones</Text>
+            </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Botones de acción */}
-        <View className="flex-row justify-between mb-8">
-          <TouchableOpacity
-            onPress={handleVerRanking}
-            className="bg-white/90 px-6 py-3 rounded-2xl shadow-md flex-1 mr-2"
-          >
-            <Text className="text-black font-bold text-center">🏆 Ver Ranking</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleVerMisiones}
-            className="bg-white/90 px-6 py-3 rounded-2xl shadow-md flex-1 ml-2"
-          >
-            <Text className="text-black font-bold text-center">🧭 Ver Misiones</Text>
-          </TouchableOpacity>
         </View>
 
         <ScrollView 
@@ -485,4 +497,4 @@ export default function Usuario() {
       </View>
     </ImageBackground>
   );
-}
+};
