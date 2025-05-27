@@ -33,6 +33,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="square.and.pencil" color={color} />,
         }}
       />
+      
       <Tabs.Screen
         name="diario/diario"
         options={{
@@ -45,6 +46,13 @@ export default function TabLayout() {
         options={{
           title: 'Misiones',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="airplane" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="retos/retos"
+        options={{
+          title: 'Retos',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -79,6 +87,8 @@ export default function TabLayout() {
       <Tabs.Screen name="mensajeria/nuevo" options={{ href: null }} />
       <Tabs.Screen name="mensajeria/UsuariosCiudad" options={{ href: null }} />
       <Tabs.Screen name="mensajeria/[id]" options={{ href: null }} />
+      <Tabs.Screen name="retos/destallesReto" options={{ href: null }} />
+      <Tabs.Screen name="crear/seleccion-retos" options={{ href: null }} />
       
     </Tabs>
   );

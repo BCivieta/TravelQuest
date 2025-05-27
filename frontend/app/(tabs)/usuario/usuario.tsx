@@ -407,7 +407,7 @@ export default function Usuario() {
           </View>
 
           {/* Botones de acción */}
-          <View className="flex-row justify-between mb-8">
+          <View className="flex-row justify-between mt-6">
             <TouchableOpacity
               onPress={handleVerRanking}
               className="bg-white/90 px-6 py-3 rounded-2xl shadow-md flex-1 mr-2"
@@ -430,7 +430,7 @@ export default function Usuario() {
           }
         >
           {/* Add refresh achievements button */}
-          <View className="mt-4 mb-2 flex-row justify-end">
+          <View className="mt-4 mb-2 flex-row justify-end px-4">
             <TouchableOpacity 
               onPress={checkAchievements}
               className="bg-[#3B82F6] py-2 px-4 rounded-lg flex-row items-center"
@@ -441,7 +441,7 @@ export default function Usuario() {
           </View>
           
           {/* Sección logros */}
-          <View className="bg-white/80 p-4 rounded-2xl shadow-md">
+          <View className="bg-white/80 p-4 mx-4 rounded-2xl shadow-md">
             <Text className="text-black font-bold text-base mb-4">
               Logros ({userLogros.length}/{logros.length})
             </Text>
@@ -497,4 +497,5 @@ export default function Usuario() {
       </View>
     </ImageBackground>
   );
-};
+}
+
