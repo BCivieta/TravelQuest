@@ -94,7 +94,7 @@ export default function ChatsCreados() {
           />
         ) : (
           <View style={styles.avatarPlaceholder}>
-            <Ionicons name="person" size={24} color="#C76F40" />
+            <Ionicons name="person" size={24} color="#403796" />
           </View>
         )}
       </View>
@@ -115,7 +115,7 @@ export default function ChatsCreados() {
   );
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#C76F40" style={{ marginTop: 40 }} />;
+    return <ActivityIndicator size="large" color="#403796" style={{ marginTop: 40 }} />;
   }
 
   return (
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 14,
-    color: '#C76F40',
+    color: '#403796',
     marginTop: 2,
     fontWeight: '500',
   },
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: 12,
-    color: '#C76F40',
+    color: '',
     marginLeft: 8,
   },
   unreadBadge: {

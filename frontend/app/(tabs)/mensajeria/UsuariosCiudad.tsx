@@ -95,7 +95,7 @@ export default function UsuariosCiudad() {
   };
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#C76F40" style={{ marginTop: 40 }} />;
+    return <ActivityIndicator size="large" color="" style={{ marginTop: 40 }} />;
   }
 
   return (
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#C76F40',
+    color: '#ffff',
     marginBottom: 4,
     textAlign: 'center',
   },
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   btn: {
-    backgroundColor: '#C76F40',
+    backgroundColor: '#403796',
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 16,

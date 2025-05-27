@@ -94,7 +94,7 @@ export default function Ranking() {
 
   // Handle back button press
   const handleBack = () => {
-    router.back();
+    router.push("/(tabs)/usuario/usuario");
   };
 
    return (
@@ -124,19 +124,23 @@ export default function Ranking() {
         </View>
 
         {/* Avatar usuario actual */}
-        <View className="items-center mb-6">
+        <View className="flex-row items-center space-x-4 mb-6">
           {loading ? (
             <ActivityIndicator size="large" color="#699D81" />
           ) : (
             <>
               <Image 
                 source={currentUser?.avatar_url ? { uri: currentUser.avatar_url } : defaultAvatar} 
-                className="w-24 h-24 rounded-full mb-2"
+                className="w-16 h-16 rounded-full"
               />
-              <Text className="text-black font-bold text-base">Nivel {currentUser?.score || 0}</Text>
+              <View>
+                <Text className="text-white text-lg font-bold ms-4">{currentUser?.username}</Text>
+                <Text className="text-white text-base ms-4">Nivel {currentUser?.score || 0}</Text>
+              </View>
             </>
           )}
         </View>
+
 
         {/* Título ranking */}
         <View className="bg-white/80 px-4 py-2 rounded-xl shadow-md self-start mb-4 flex-row items-center gap-2">

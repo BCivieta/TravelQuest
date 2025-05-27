@@ -60,37 +60,46 @@ export default function DetalleMisionCompletada() {
   }
 
   return (
-    <ImageBackground
-      source={require("../../../assets/images/fondo.png")}
-      style={{ flex: 1 }}
-      resizeMode="cover"
-    >
-      <SafeAreaView className="flex-1">
+  <ImageBackground
+    source={require("../../../assets/images/fondo.png")}
+    style={{ flex: 1 }}
+    resizeMode="cover"
+  >
+    <SafeAreaView className="flex-1">
+      
+      {/* Botón volver fijo */}
+      <TouchableOpacity
+        onPress={() => router.push("./listaMisiones")}
+        className="absolute top-6 left-4 z-50 bg-white p-2 rounded-full shadow-md"
+      >
+        <Ionicons name="arrow-back" size={24} color="#000" />
+      </TouchableOpacity>
 
-        {/* Botón volver fijo */}
-        <TouchableOpacity
-          onPress={() => router.push("./listaMisiones")}
-          className="absolute top-6 left-4 z-50 bg-white/90 p-2 rounded-full shadow-md"
-        >
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
+      {/* Contenido desplazable */}
+      <View className="flex-1 pt-20 px-6">
+        <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
 
-        {/* Contenido desplazable */}
-        <View className="flex-1 pt-20 px-6">
-          <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
-            {/* Título */}
-            <View className="bg-white/80 px-4 py-2 rounded-xl shadow-md self-start mb-6 flex-row items-center gap-2">
-              <Text className="text-black text-lg font-bold">📌 {mission.title}</Text>
-            </View>
+          {/* Título */}
+          <View className="bg-white px-4 py-2 rounded-xl shadow-md self-start mb-6 flex-row items-center gap-2">
+            <Text className="text-black text-lg font-bold">📌 {mission.title}</Text>
+          </View>
 
+          {/* Tarjeta agrupadora de descripción + completado + imagen */}
+          <View className="bg-white/90 p-4 rounded-2xl shadow-md mb-6">
             {/* Descripción */}
-            <View className="bg-white/80 rounded-2xl shadow-md p-4 mb-6">
-              <Text className="text-black text-base leading-6">{mission.description}</Text>
-            </View>
+            <Text className="text-black text-base leading-6 mb-4">
+              {mission.description}
+            </Text>
 
             {/* Fecha */}
-            <View className="bg-white/80 rounded-xl shadow-md px-4 py-3 mb-6 self-start flex-row items-center gap-2">
-              <Text className="text-black text-base">✅ Completada el {new Date(mission.completed_at).toLocaleDateString("es-ES")}</Text>
+            <View className="bg-white rounded-xl shadow-sm px-4 py-3 mb-4 self-start flex-row items-center gap-2">
+              <Text className="text-black text-base">
+                ✅ Completada el {new Date(mission.completed_at).toLocaleDateString("es-ES", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </Text>
             </View>
 
             {/* Imagen */}
@@ -99,32 +108,34 @@ export default function DetalleMisionCompletada() {
                 source={{ uri: mission.image_url }}
                 style={{
                   width: "100%",
-                  height: imageHeight,
-                  borderRadius: 16,
-                  marginBottom: 24,
+                  height: 160, // imagen más pequeña
+                  borderRadius: 12,
                 }}
                 resizeMode="cover"
               />
             ) : (
-              <Text className="text-gray-600 italic mb-6">No se subió imagen para esta misión.</Text>
+              <Text className="text-gray-600 italic">No se subió imagen para esta misión.</Text>
             )}
+          </View>
 
-            {/* Historia */}
-            {mission.status === "completed" && mission.historia && (
-              <>
-                <View className="bg-white/80 px-4 py-2 rounded-xl shadow-md self-start mb-4 flex-row items-center gap-2">
-                  <Text className="text-black text-lg font-bold">📖 Historia del lugar</Text>
-                </View>
+          {/* Historia */}
+          {mission.status === "completed" && mission.historia && (
+            <>
+              <View className="bg-white px-4 py-2 rounded-xl shadow-md self-start mb-4 flex-row items-center gap-2">
+                <Text className="text-black text-lg font-bold">📖 Historia del lugar</Text>
+              </View>
 
-                <View className="bg-white/80 rounded-2xl p-4 shadow-md">
-                  <Text className="text-black leading-6 text-justify">{mission.historia}</Text>
-                </View>
-              </>
-            )}
-          </ScrollView>
-        </View>
+              <View className="bg-white/95 rounded-2xl p-4 shadow-md">
+                <Text className="text-black leading-6 text-justify">
+                  {mission.historia}
+                </Text>
+              </View>
+            </>
+          )}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  </ImageBackground>
+);
 
-      </SafeAreaView>
-    </ImageBackground>
-  );
 }
