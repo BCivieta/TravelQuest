@@ -1,7 +1,7 @@
 // backend/src/controllers/locationController.js
 import { supabase } from "../../config/supabaseClient.js";
 import axios from "axios";
-import { checkAndAwardAchievements } from '../logrocontroller.js';
+import { checkAndAwardAchievements } from '../logroController.js';
 
 // API Key de OpenCage (o Google Geocoding API)
 const GEOCODING_API_KEY = "TU_API_KEY";
