@@ -7,6 +7,7 @@ import { updateUserLevel } from './userController.js';
 
 
 export const createOrAssignGroupChallenge = async (req, res) => {
+  console.log("hola");
   const userId = req.user?.id;
   const { city_id, quantity, is_solo } = req.body;
 
