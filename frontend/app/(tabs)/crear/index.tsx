@@ -19,30 +19,6 @@ export default function OpcionesDeCrear() {
       params: { cityId: ubicacion.cityId.toString() },
     });
   };
-
-  const irARetoIndividual = () => {
-  if (!ubicacion?.cityId) {
-    Alert.alert("Error", "No se ha detectado ninguna ciudad.");
-    return;
-  }
-  router.push({
-    pathname: "/crear/seleccion-retos",
-    params: { mode: "solo", cityId: ubicacion.cityId.toString() },
-  });
-};
-
-const irARetoGrupal = () => {
-  if (!ubicacion?.cityId) {
-    Alert.alert("Error", "No se ha detectado ninguna ciudad.");
-    return;
-  }
-  router.push({
-    pathname: "/crear/seleccion-retos",
-    params: { mode: "grupo", cityId: ubicacion.cityId.toString() },
-  });
-};
-
-  
   const irAEditarDiario =()=>{
     router.push("./crear/2.2entradaDiario");
   };
@@ -123,34 +99,6 @@ const irARetoGrupal = () => {
       <View>
         <Text className="text-black font-bold text-lg">🧭 Iniciar nueva misión</Text>
         <Text className="text-black/60 text-sm">Desbloquea una nueva aventura</Text>
-      </View>
-      <Text className="text-black text-2xl">→</Text>
-    </View>
-  </TouchableOpacity>
-
-  {/* Botón reto individual */}
-  <TouchableOpacity
-    className="bg-white px-4 py-4 mb-3 rounded-xl border border-gray-200 shadow-sm"
-    onPress={irARetoIndividual}
-  >
-    <View className="flex-row items-center justify-between">
-      <View>
-        <Text className="text-black font-bold text-lg">🎯 Reto individual</Text>
-        <Text className="text-black/60 text-sm">Haz varias misiones</Text>
-      </View>
-      <Text className="text-black text-2xl">→</Text>
-    </View>
-  </TouchableOpacity>
-
-  {/* Botón reto grupal */}
-  <TouchableOpacity
-    className="bg-white px-4 py-4 mb-5 rounded-xl border border-gray-200 shadow-sm"
-    onPress={irARetoGrupal}
-  >
-    <View className="flex-row items-center justify-between">
-      <View>
-        <Text className="text-black font-bold text-lg">👥 Reto grupal</Text>
-        <Text className="text-black/60 text-sm">Invita a amigos a compartir misiones</Text>
       </View>
       <Text className="text-black text-2xl">→</Text>
     </View>
