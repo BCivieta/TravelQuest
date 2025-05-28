@@ -36,7 +36,7 @@ export default function Geolocalizacion() {
         // Configuramos la vista inicial para mostrar el globo completo
         mapRef.current.postMessage(JSON.stringify({
           type: 'viewEarth',
-          height: 3000000, // Altura para ver el globo completo
+          height: 2000000, // Usar el mismo valor que en setupEarthView
           duration: 0 // Sin animación inicial
         }));
         
@@ -164,18 +164,10 @@ export default function Geolocalizacion() {
           🧭 Activa tu ubicación
         </Text>
 
-        <View className="h-[400px] rounded-xl overflow-hidden mb-4 bg-white/80">
-          <LightWebCesiumMap coords={coords} height={500} ref={mapRef} interactive={true} />
+        <View className="flex-1 mb-4 rounded-xl overflow-hidden">
+        <LightWebCesiumMap coords={coords} height={"100%"} ref={mapRef} interactive={true} />
         </View>
-
-        {coords && (
-          <View className="bg-white/80 px-4 py-3 rounded-xl mt-3 mb-4 items-center">
-            <Text className="text-black font-medium">
-              Lat: {coords.latitude.toFixed(4)}, Lon: {coords.longitude.toFixed(4)}
-            </Text>
-          </View>
-        )}
-
+        
         <View className="items-center">
           <TouchableOpacity
             onPress={handleGeolocalizar}

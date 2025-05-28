@@ -7,7 +7,7 @@ const CESIUM_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxZTlhYjgxO
 
 interface LightWebCesiumMapProps {
   coords: { latitude: number; longitude: number; height?: number } | null;
-  height?: number;
+  height?: number | string;
   interactive?: boolean;
 }
 
@@ -206,12 +206,17 @@ const LightWebCesiumMap = forwardRef(({ coords, height = 400, interactive = true
   `;
 
   return (
-    <View style={{ height, borderRadius: 12, overflow: 'hidden' }}>
+    <View style={{ 
+      height: typeof height === 'string' && height.includes('%') ? height as `${number}%` : typeof height === 'number' ? height : 'auto', 
+      borderRadius: 12, 
+      overflow: 'hidden', 
+      flex: 1 
+    }}>
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
         source={{ html: htmlContent }}
-        style={{ flex: 1, backgroundColor: 'black' }}
+        style={{ flex: 1, backgroundColor: 'black', width: '100%', height: '100%' }}
         onMessage={handleMessage}
         javaScriptEnabled={true}
         domStorageEnabled={true}
