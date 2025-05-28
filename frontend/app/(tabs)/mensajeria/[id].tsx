@@ -63,6 +63,8 @@ export default function ChatScreen() {
   const [otherUser, setOtherUser] = useState<{ nombre: string; foto_perfil?: string; id: string } | null>(null);
   const [isConversation, setIsConversation] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationStatus, setConversationStatus] = useState<string>('accepted');
+  const [isCreator, setIsCreator] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -122,6 +124,8 @@ export default function ChatScreen() {
                 const convData = await convRes.json();
                 console.log("✅ Conversación creada/encontrada:", convData);
                 setConversationId(convData.id);
+                setConversationStatus(convData.status || 'accepted');
+                setIsCreator(convData.created_by === currentUserId);
                 setTimeout(fetchMessages, 500);
               } else {
                 console.error("❌ Error al crear conversación");
@@ -351,8 +355,21 @@ export default function ChatScreen() {
   };
 
   const sendMessage = async () => {
-    // Si no hay texto, no hacer nada
-    if (!input.trim()) {
+    if (!input.trim() || !conversationId || !userId) return;
+    
+    // No permitir enviar mensajes si la conversación está pendiente
+    if (conversationStatus === 'pending') {
+      if (isCreator) {
+        Alert.alert("Chat pendiente", "El destinatario aún no ha aceptado tu solicitud de chat.");
+      } else {
+        Alert.alert("Chat pendiente", "Primero debes aceptar esta solicitud de chat para poder conversar.");
+      }
+      return;
+    }
+    
+    // No permitir enviar mensajes si la conversación fue rechazada
+    if (conversationStatus === 'rejected') {
+      Alert.alert("Chat rechazado", "Esta solicitud de chat ha sido rechazada.");
       return;
     }
     
@@ -488,31 +505,59 @@ export default function ChatScreen() {
   // Función para obtener información actualizada del otro usuario
   const fetchOtherUserInfo = async (conversationId: string, currentUserId: string) => {
     try {
-      const convRes = await apiFetch(`/conversations/details/${conversationId}`);
-      if (convRes.ok) {
-        const convData = await convRes.json();
-        console.log("✅ Detalles de conversación:", convData);
+      console.log("🔍 Buscando información de conversación:", conversationId);
+      const res = await apiFetch(`/conversations/details/${conversationId}`);
+      
+      if (!res.ok) {
+        console.error("❌ Error al obtener detalles de conversación");
         
-        // Determinar cuál es el otro usuario
-        const otherUserId = convData.user_1_id === currentUserId 
-          ? convData.user_2_id 
-          : convData.user_1_id;
-        
-        // Buscar información del otro usuario
-        const userRes = await apiFetch(`/users/${otherUserId}`);
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          console.log("✅ Información actualizada del usuario:", userData);
-          setOtherUser(userData);
-        } else {
-          // Si no podemos obtener el usuario, usar un valor por defecto
-          setOtherUser({ id: otherUserId, nombre: 'Usuario' });
+        // Si el error es 404, significa que la conversación fue rechazada y eliminada
+        if (res.status === 404) {
+          Alert.alert(
+            "Chat no disponible", 
+            "Este chat ya no existe. Es posible que haya sido rechazado o eliminado.",
+            [{ text: "Volver", onPress: () => router.push('/(tabs)/mensajeria') }]
+          );
         }
-        return true;
+        
+        return false;
       }
-      return false;
+      
+      const conversation = await res.json();
+      console.log("✅ Detalles de conversación:", conversation);
+      
+      // Determinar cuál es el otro usuario en la conversación
+      const otherUserId = conversation.user_1_id === currentUserId 
+        ? conversation.user_2_id 
+        : conversation.user_1_id;
+      
+      // Guardar el estado de la conversación
+      setConversationStatus(conversation.status || 'accepted');
+      setIsCreator(conversation.created_by === currentUserId);
+      
+      console.log("🔍 Buscando información del otro usuario:", otherUserId);
+      const userRes = await apiFetch(`/users/${otherUserId}`);
+      
+      if (!userRes.ok) {
+        console.error("❌ Error al obtener información del usuario");
+        return false;
+      }
+      
+      const userData = await userRes.json();
+      console.log("✅ Datos del otro usuario:", userData);
+      setOtherUser(userData);
+      
+      return true;
     } catch (err) {
-      console.error("❌ Error al obtener detalles de conversación:", err);
+      console.error("❌ Error general al obtener información de usuario:", err);
+      
+      // Si hay un error al obtener información, redirigir al usuario
+      Alert.alert(
+        "Error", 
+        "No se pudo obtener información del chat. Volviendo a la lista de chats.",
+        [{ text: "Aceptar", onPress: () => router.push('/(tabs)/mensajeria') }]
+      );
+      
       return false;
     }
   };
@@ -576,6 +621,50 @@ export default function ChatScreen() {
               </Text>
             </View>
           </View>
+
+          {/* Mensaje de chat pendiente */}
+          {conversationStatus === 'pending' && (
+            <View style={{
+              backgroundColor: '#FFF8E1',
+              padding: 16,
+              marginHorizontal: 16,
+              marginTop: 16,
+              borderRadius: 8,
+              borderLeftWidth: 4,
+              borderLeftColor: '#FFAB40',
+              flexDirection: 'row',
+              alignItems: 'center'
+            }}>
+              <Ionicons name="alert-circle" size={24} color="#FFAB40" style={{ marginRight: 8 }} />
+              <Text style={{ flex: 1, color: '#333' }}>
+                {isCreator 
+                  ? 'Has enviado una solicitud de chat. Espera a que el destinatario la acepte.' 
+                  : 'Has recibido una solicitud de chat. Ve a "Chats creados" para aceptarla o rechazarla.'}
+              </Text>
+            </View>
+          )}
+
+          {/* Mensaje de chat rechazado */}
+          {conversationStatus === 'rejected' && (
+            <View style={{
+              backgroundColor: '#FFEBEE',
+              padding: 16,
+              marginHorizontal: 16,
+              marginTop: 16,
+              borderRadius: 8,
+              borderLeftWidth: 4,
+              borderLeftColor: '#F44336',
+              flexDirection: 'row',
+              alignItems: 'center'
+            }}>
+              <Ionicons name="close-circle" size={24} color="#F44336" style={{ marginRight: 8 }} />
+              <Text style={{ flex: 1, color: '#333' }}>
+                {isCreator 
+                  ? 'El destinatario ha rechazado tu solicitud de chat.' 
+                  : 'Has rechazado esta solicitud de chat.'}
+              </Text>
+            </View>
+          )}
 
           {/* Messages Area - Flex:1 takes all available space */}
           <View style={{ 

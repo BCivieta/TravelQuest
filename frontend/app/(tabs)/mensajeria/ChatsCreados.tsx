@@ -27,6 +27,9 @@ interface Conversation {
   lastMessage: string;
   lastDate: string;
   unread: number;
+  status?: string;
+  isPending?: boolean;
+  isCreator?: boolean;
 }
 
 export default function ChatsCreados() {
@@ -57,6 +60,15 @@ export default function ChatsCreados() {
   };
 
   const handleOpenChat = (conversation: Conversation) => {
+    // No permitir abrir chats pendientes si soy el receptor
+    if (conversation.isPending && !conversation.isCreator) {
+      Alert.alert(
+        "Chat pendiente",
+        "Primero debes aceptar esta solicitud de chat para poder conversar."
+      );
+      return;
+    }
+    
     // Depurar qué información tenemos de la conversación
     console.log("🔍 Información de conversación:", {
       conversationId: conversation.id,
@@ -83,35 +95,119 @@ export default function ChatsCreados() {
     );
   };
 
+  const handleAcceptChat = async (conversation: Conversation) => {
+    if (!userId) return;
+    
+    try {
+      const res = await apiFetch(`/conversations/${conversation.id}/accept`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.text();
+        console.error("Error al aceptar chat:", res.status, errorData);
+        Alert.alert("Error", "No se pudo aceptar la solicitud de chat");
+        return;
+      }
+      
+      // Actualizar la lista de conversaciones
+      Alert.alert("Éxito", "Has aceptado la solicitud de chat");
+      if (userId) fetchConversations(userId);
+    } catch (err) {
+      console.error("Error al aceptar chat:", err);
+      Alert.alert("Error", "No se pudo aceptar la solicitud de chat");
+    }
+  };
+
+  const handleRejectChat = async (conversation: Conversation) => {
+    if (!userId) return;
+    
+    try {
+      const res = await apiFetch(`/conversations/${conversation.id}/reject`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.text();
+        console.error("Error al rechazar chat:", res.status, errorData);
+        Alert.alert("Error", "No se pudo rechazar la solicitud de chat");
+        return;
+      }
+      
+      // Eliminar la conversación de la lista local
+      setConversations(prevConversations => 
+        prevConversations.filter(conv => conv.id !== conversation.id)
+      );
+      
+      // Mostrar confirmación
+      Alert.alert("Éxito", "Has rechazado la solicitud de chat");
+    } catch (err) {
+      console.error("Error al rechazar chat:", err);
+      Alert.alert("Error", "No se pudo rechazar la solicitud de chat");
+    }
+  };
+
   const renderItem = ({ item }: { item: Conversation }) => (
-    <TouchableOpacity style={styles.chatItem} onPress={() => handleOpenChat(item)}>
-      <View style={styles.avatar}>
-        {item.user.foto_perfil ? (
-          <Image 
-            source={{ uri: item.user.foto_perfil }} 
-            style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#fff3e9' }} 
-            defaultSource={require('../../../assets/images/avatar.png')}
-          />
-        ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Ionicons name="person" size={24} color="#403796" />
+    <View style={[styles.chatItem, item.isPending && !item.isCreator && styles.pendingChat]}>
+      <TouchableOpacity 
+        style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+        onPress={() => handleOpenChat(item)}
+        disabled={item.isPending && !item.isCreator}
+      >
+        <View style={styles.avatar}>
+          {item.user.foto_perfil ? (
+            <Image 
+              source={{ uri: item.user.foto_perfil }} 
+              style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#fff3e9' }} 
+              defaultSource={require('../../../assets/images/avatar.png')}
+            />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Ionicons name="person" size={24} color="#403796" />
+            </View>
+          )}
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>{item.user.nombre}</Text>
+          {item.user.username && (
+            <Text style={styles.username}>@{item.user.username}</Text>
+          )}
+          {item.isPending && !item.isCreator ? (
+            <Text style={styles.pendingText}>Solicitud de chat pendiente</Text>
+          ) : (
+            <Text style={styles.lastMessage} numberOfLines={1}>{item.lastMessage}</Text>
+          )}
+        </View>
+        <Text style={styles.time}>{item.lastDate ? new Date(item.lastDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</Text>
+        {item.unread > 0 && (
+          <View style={styles.unreadBadge}>
+            <Text style={styles.unreadText}>{item.unread}</Text>
           </View>
         )}
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.title}>{item.user.nombre}</Text>
-        {item.user.username && (
-          <Text style={styles.username}>@{item.user.username}</Text>
-        )}
-        <Text style={styles.lastMessage} numberOfLines={1}>{item.lastMessage}</Text>
-      </View>
-      <Text style={styles.time}>{item.lastDate ? new Date(item.lastDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</Text>
-      {item.unread > 0 && (
-        <View style={styles.unreadBadge}>
-          <Text style={styles.unreadText}>{item.unread}</Text>
+      </TouchableOpacity>
+
+      {/* Botones de aceptar/rechazar para chats pendientes donde el usuario es el receptor */}
+      {item.isPending && !item.isCreator && (
+        <View style={styles.pendingButtons}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.acceptButton]} 
+            onPress={() => handleAcceptChat(item)}
+          >
+            <Ionicons name="checkmark" size={20} color="#fff" />
+            <Text style={styles.actionButtonText}>Aceptar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.rejectButton]} 
+            onPress={() => handleRejectChat(item)}
+          >
+            <Ionicons name="close" size={20} color="#fff" />
+            <Text style={styles.actionButtonText}>Rechazar</Text>
+          </TouchableOpacity>
         </View>
       )}
-    </TouchableOpacity>
+    </View>
   );
 
   if (loading) {
@@ -131,8 +227,7 @@ export default function ChatsCreados() {
 
 const styles = StyleSheet.create({
   chatItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
     backgroundColor: '#f8f8f8',
     borderRadius: 16,
     padding: 16,
@@ -141,6 +236,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+  },
+  pendingChat: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#FFAB40',
+    backgroundColor: '#FFF8E1',
   },
   avatar: {
     width: 48,
@@ -173,6 +273,12 @@ const styles = StyleSheet.create({
     color: '#888',
     marginTop: 2,
   },
+  pendingText: {
+    fontSize: 14,
+    color: '#FFAB40',
+    fontWeight: '500',
+    marginTop: 2,
+  },
   time: {
     fontSize: 12,
     color: '',
@@ -192,5 +298,34 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 12,
+  },
+  pendingButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  acceptButton: {
+    backgroundColor: '#4CAF50',
+  },
+  rejectButton: {
+    backgroundColor: '#F44336',
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginLeft: 4,
   },
 }); 

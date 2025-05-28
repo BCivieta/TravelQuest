@@ -63,7 +63,7 @@ export const createConversation = async (req, res) => {
     console.log("🔍 Buscando conversación existente entre usuarios:", formattedId1, formattedId2);
     const { data: existingConv, error: convError } = await supabase
       .from('conversations')
-      .select('id')
+      .select('id, status')
       .or(`and(user_1_id.eq.${formattedId1},user_2_id.eq.${formattedId2}),and(user_1_id.eq.${formattedId2},user_2_id.eq.${formattedId1})`)
       .maybeSingle();
       
@@ -79,6 +79,7 @@ export const createConversation = async (req, res) => {
         id: existingConv.id,
         user_1_id: formattedId1,
         user_2_id: formattedId2,
+        status: existingConv.status || 'accepted', // Para conversaciones existentes sin status
         message: 'Conversación existente recuperada' 
       });
     }
@@ -86,11 +87,15 @@ export const createConversation = async (req, res) => {
     // Si no existe, crear una nueva conversación
     console.log("🔨 Creando nueva conversación entre:", formattedId1, "y", formattedId2);
     
+    // El creador es user_1_id, y el receptor es user_2_id
+    // La conversación comienza en estado 'pending' (pendiente de aceptación)
     const { data, error } = await supabase
       .from('conversations')
       .insert([{ 
         user_1_id: formattedId1, 
-        user_2_id: formattedId2
+        user_2_id: formattedId2,
+        status: 'pending',
+        created_by: formattedId1
       }])
       .select();
       
@@ -116,7 +121,7 @@ export const getConversationDetails = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('conversations')
-      .select('id, user_1_id, user_2_id, created_at')
+      .select('id, user_1_id, user_2_id, created_at, status, created_by')
       .eq('id', id)
       .single();
       
@@ -148,7 +153,7 @@ export const getUserConversations = async (req, res) => {
     // Buscar conversaciones donde el usuario es cualquiera de los participantes
     const { data: conversationsData, error: conversationsError } = await supabase
       .from('conversations')
-      .select('id, user_1_id, user_2_id, created_at')
+      .select('id, user_1_id, user_2_id, created_at, status, created_by')
       .or(`user_1_id.eq.${userId},user_2_id.eq.${userId}`);
       
     if (conversationsError) {
@@ -199,6 +204,9 @@ export const getUserConversations = async (req, res) => {
         },
         lastMessage: lastMessageData ? lastMessageData.content : '',
         lastDate: lastMessageData ? lastMessageData.sent_at : conv.created_at,
+        status: conv.status || 'accepted', // Por compatibilidad con conversaciones sin estado
+        isPending: conv.status === 'pending',
+        isCreator: conv.created_by === userId,
         unread: 0 // Esto requeriría una consulta adicional para contar mensajes no leídos
       };
     }));
@@ -206,6 +214,97 @@ export const getUserConversations = async (req, res) => {
     res.json(conversationsWithUserData);
   } catch (err) {
     console.error("❌ Error general al obtener conversaciones de usuario:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Aceptar una solicitud de conversación
+export const acceptConversation = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  
+  try {
+    // Verificar que la conversación existe y que el usuario es parte de ella
+    const { data: conversation, error: getError } = await supabase
+      .from('conversations')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (getError || !conversation) {
+      console.error("❌ Error al obtener conversación:", getError);
+      return res.status(404).json({ error: 'Conversación no encontrada' });
+    }
+    
+    // Verificar que el usuario actual es receptor (user_2_id) y que el estado es 'pending'
+    if (conversation.user_2_id !== userId) {
+      return res.status(403).json({ error: 'No autorizado para aceptar esta conversación' });
+    }
+    
+    if (conversation.status !== 'pending') {
+      return res.status(400).json({ error: 'La conversación ya ha sido procesada' });
+    }
+    
+    // Actualizar el estado de la conversación a 'accepted'
+    const { data, error } = await supabase
+      .from('conversations')
+      .update({ status: 'accepted' })
+      .eq('id', id)
+      .select();
+      
+    if (error) {
+      console.error("❌ Error al aceptar conversación:", error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    res.status(200).json({ message: 'Conversación aceptada', conversation: data[0] });
+  } catch (err) {
+    console.error("❌ Error general al aceptar conversación:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Rechazar una solicitud de conversación
+export const rejectConversation = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  
+  try {
+    // Verificar que la conversación existe y que el usuario es parte de ella
+    const { data: conversation, error: getError } = await supabase
+      .from('conversations')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (getError || !conversation) {
+      console.error("❌ Error al obtener conversación:", getError);
+      return res.status(404).json({ error: 'Conversación no encontrada' });
+    }
+    
+    // Verificar que el usuario actual es receptor (user_2_id) y que el estado es 'pending'
+    if (conversation.user_2_id !== userId) {
+      return res.status(403).json({ error: 'No autorizado para rechazar esta conversación' });
+    }
+    
+    if (conversation.status !== 'pending') {
+      return res.status(400).json({ error: 'La conversación ya ha sido procesada' });
+    }
+    
+    // Eliminar la conversación en lugar de actualizar su estado
+    const { error } = await supabase
+      .from('conversations')
+      .delete()
+      .eq('id', id);
+      
+    if (error) {
+      console.error("❌ Error al eliminar conversación:", error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    res.status(200).json({ message: 'Conversación rechazada y eliminada' });
+  } catch (err) {
+    console.error("❌ Error general al rechazar conversación:", err);
     res.status(500).json({ error: err.message });
   }
 }; 
