@@ -84,7 +84,7 @@ export default function Geolocalizacion() {
           latitude,
           longitude,
           height: 10000,
-          duration: 2
+          duration: 5
         });
         mapRef.current.postMessage(message);
       }

@@ -121,10 +121,10 @@ const LightWebCesiumMap = forwardRef(({ coords, height = 400, interactive = true
             function setupEarthView() {
               // Posicionar la cámara para ver el globo terráqueo centrado
               viewer.camera.setView({
-                destination: Cesium.Cartesian3.fromDegrees(20, 15, 2000000), // Reducido para ver el globo más grande
+                destination: Cesium.Cartesian3.fromDegrees(-5, 30, 1000000), // Reducido para ver el globo más grande
                 orientation: {
                   heading: 0.0,
-                  pitch: -0.3,
+                  pitch: -0.5,
                   roll: 0.0
                 }
               });
@@ -168,7 +168,7 @@ const LightWebCesiumMap = forwardRef(({ coords, height = 400, interactive = true
                     destination: Cesium.Cartesian3.fromDegrees(20, 15, message.height || 2000000),
                     orientation: {
                       heading: 0.0,
-                      pitch: -0.3,
+                      pitch: -0.5,
                       roll: 0.0
                     },
                     duration: 0
