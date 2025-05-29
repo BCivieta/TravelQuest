@@ -14,6 +14,9 @@ export const LOGROS = {
   MISION_DIFICIL: 'mision_dificil',
   DIEZ_MISIONES: 'diez_misiones',
   CIEN_MISIONES: 'cien_misiones',
+  PRIMERA_PARADA: 'primera_parada',
+  MOCHILERO: 'cinco_viajes',
+  EXPLORADOR_EXPERTO: 'diez_viajes',
   // Add other achievement types as needed
 };
 
@@ -35,6 +38,53 @@ export const getUserAchievements = async (userId) => {
     throw error;
   }
 };
+
+/**
+ * Check and award achievements related to completed trips (based on diary entries on distinct days)
+ */
+async function checkViajeAchievements(userId, unlockedAchievementIds, allAchievements, newAchievements, addPoints) {
+  try {
+    // Get distinct dates from user's diary entries
+    const { data: diaryEntries, error: diaryEntriesError } = await supabase
+      .from('diary_entries')
+      .select('entry_date') // Select the date of the diary entry
+      .eq('user_id', userId);
+      
+    if (diaryEntriesError) throw diaryEntriesError;
+    
+    // Extract and count distinct dates
+    const distinctDates = new Set(diaryEntries.map(entry => new Date(entry.entry_date).toDateString()));
+    const distinctDaysCount = distinctDates.size;
+    
+    console.log(`👤 User has diary entries on ${distinctDaysCount} distinct days`);
+    
+    // Check "Mochilero" achievement - diary entry on 1 distinct day (code 'cinco_viajes')
+    await checkSingleAchievement(
+      LOGROS.MOCHILERO,
+      distinctDaysCount >= 1, // Condition changed to 1 distinct day
+      userId,
+      unlockedAchievementIds,
+      allAchievements,
+      newAchievements,
+      addPoints
+    );
+    
+    // Check "Explorador experto" achievement - diary entries on 5 distinct days (code 'diez_viajes')
+    await checkSingleAchievement(
+      LOGROS.EXPLORADOR_EXPERTO,
+      distinctDaysCount >= 5, // Condition changed to 5 distinct days
+      userId,
+      unlockedAchievementIds,
+      allAchievements,
+      newAchievements,
+      addPoints
+    );
+    
+  } catch (error) {
+    console.error('Error checking trip achievements:', error);
+    throw error;
+  }
+}
 
 /**
  * Check and award achievements for a user
@@ -70,25 +120,26 @@ export const checkAndAwardAchievements = async (userId, trigger = 'GENERAL') => 
       totalPointsEarned += points;
     };
     
-    // Check city-related achievements
+    // Check City Achievements (Primera parada, Trotamundos)
     await checkCityAchievements(userId, unlockedAchievementIds, allAchievements, newAchievements, addPoints);
     
-    // Check mission-related achievements
-    if (trigger === 'MISSION_COMPLETED' || trigger === 'CHECK_ALL') {
-      await checkMissionAchievements(userId, unlockedAchievementIds, allAchievements, newAchievements, addPoints);
-    }
-    
+    // Check Mission Achievements (Primera mision, etc.)
+    await checkMissionAchievements(userId, unlockedAchievementIds, allAchievements, newAchievements, addPoints);
+
+    // Check Trip Achievements (Mochilero, Explorador experto)
+    await checkViajeAchievements(userId, unlockedAchievementIds, allAchievements, newAchievements, addPoints);
+
     // Update user score if points were earned
     if (totalPointsEarned > 0) {
       await updateUserScore(userId, totalPointsEarned);
     }
-    
-    return {
-      newAchievements,
-      pointsEarned: totalPointsEarned
-    };
+
+    console.log(`🏆 Achievement check complete for user ${userId}. New achievements: ${newAchievements.length}, Points earned: ${totalPointsEarned}`);
+
+    return { newAchievements, pointsEarned: totalPointsEarned };
+
   } catch (error) {
-    console.error('Error checking achievements:', error);
+    console.error('Error in checkAndAwardAchievements:', error);
     throw error;
   }
 };
@@ -98,6 +149,17 @@ export const checkAndAwardAchievements = async (userId, trigger = 'GENERAL') => 
  */
 async function checkCityAchievements(userId, unlockedAchievementIds, allAchievements, newAchievements, addPoints) {
   try {
+    // Check "Primera parada" achievement - always awarded by default
+    await checkSingleAchievement(
+      LOGROS.PRIMERA_CIUDAD,
+      true, // Condition is always true for this achievement
+      userId,
+      unlockedAchievementIds,
+      allAchievements,
+      newAchievements,
+      addPoints
+    );
+
     // Get user's visited cities
     const { data: userCities, error: citiesError } = await supabase
       .from('user_cities')
@@ -122,17 +184,6 @@ async function checkCityAchievements(userId, unlockedAchievementIds, allAchievem
       const uniqueValidCityCount = new Set(validCityIds).size;
       
       console.log(`👤 User has visited ${uniqueValidCityCount} valid cities`);
-      
-      // Check "Primera parada" achievement - first city visited
-      await checkSingleAchievement(
-        LOGROS.PRIMERA_CIUDAD,
-        uniqueValidCityCount >= 1,
-        userId,
-        unlockedAchievementIds,
-        allAchievements,
-        newAchievements,
-        addPoints
-      );
       
       // Check "Trotamundos" achievement - 5 different cities
       await checkSingleAchievement(

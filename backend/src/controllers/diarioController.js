@@ -2,6 +2,7 @@ import { supabase } from '../config/supabase.js';
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import { createSupabaseClientWithAuth } from '../config/supabaseWithAuth.js';
+import { checkAndAwardAchievements } from './logroController.js'; // Add this line
 
 
 /**
@@ -136,6 +137,10 @@ export const createOrAppendJournalEntry = async (req, res) => {
         .single();
   
       if (entryError) throw entryError;
+
+      // Call checkAndAwardAchievements after a successful diary entry
+      await checkAndAwardAchievements(userId, 'DIARY_ENTRY');
+
       //Respuesta final
       res.status(201).json({
         message: "Entrada del diario guardada correctamente",
