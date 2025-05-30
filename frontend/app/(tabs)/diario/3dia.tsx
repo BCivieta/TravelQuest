@@ -99,9 +99,9 @@ export default function DayDetail() {
                   shadowOpacity: 0.15,
                   shadowRadius: 2,
                 }}
-              >
-  <Text className="text-black text-sm font-semibold">➕ Añadir</Text>
-</TouchableOpacity>
+                 >
+                <Text className="text-black text-sm font-semibold">➕ Añadir</Text>
+              </TouchableOpacity>
 
             </View>
 
