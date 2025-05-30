@@ -90,6 +90,24 @@ export default function CreateJournalEntry() {
       setDescription("");
       setImageUri(null);
       router.replace("/(tabs)/crear");
+
+      // Trigger achievement check after successful diary entry
+      try {
+        const checkRes = await apiFetch("/achievements/check", {
+          method: "POST",
+        });
+        if (!checkRes.ok) {
+          console.error("Error triggering achievement check:", checkRes.status);
+        }
+        const checkData = await checkRes.json();
+        if (checkData.newAchievements && checkData.newAchievements.length > 0) {
+          // Optionally show an alert for new achievements here as well
+          console.log("🎉 New achievements unlocked:", checkData.newAchievements);
+        }
+      } catch (achievementError) {
+        console.error("Error calling achievement check endpoint:", achievementError);
+      }
+
     } catch (error) {
       console.error("❌ Error al publicar:", error);
       Alert.alert("Error", "No se pudo guardar la entrada.");

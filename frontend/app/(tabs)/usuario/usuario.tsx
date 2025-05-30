@@ -346,7 +346,6 @@ export default function Usuario() {
       resizeMode="cover"
     >
       <View className="flex-1 px-6 pt-14">
-
         {/* Cabecera con avatar, nombre y menú */}
         <View className="flex-row justify-between items-center mb-6">
           <View className="flex-row items-center space-x-4">
@@ -412,7 +411,23 @@ export default function Usuario() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView contentContainerStyle={{ paddingBottom: 160 }}>
+        <ScrollView 
+          contentContainerStyle={{ paddingBottom: 160 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {/* Add refresh achievements button */}
+          <View className="mt-4 mb-2 flex-row justify-end">
+            <TouchableOpacity 
+              onPress={checkAchievements}
+              className="bg-[#3B82F6] py-2 px-4 rounded-lg flex-row items-center"
+            >
+              <Ionicons name="refresh" size={18} color="white" />
+              <Text className="text-white ml-2 font-medium">Verificar logros</Text>
+            </TouchableOpacity>
+          </View>
+          
           {/* Sección logros */}
           <View className="bg-white/80 p-4 rounded-2xl shadow-md">
             <Text className="text-black font-bold text-base mb-4">
@@ -471,4 +486,3 @@ export default function Usuario() {
     </ImageBackground>
   );
 }
-

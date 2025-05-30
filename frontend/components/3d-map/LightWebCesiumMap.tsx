@@ -7,7 +7,7 @@ const CESIUM_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxZTlhYjgxO
 
 interface LightWebCesiumMapProps {
   coords: { latitude: number; longitude: number; height?: number } | null;
-  height?: number;
+  height?: number | string;
   interactive?: boolean;
 }
 
@@ -121,10 +121,10 @@ const LightWebCesiumMap = forwardRef(({ coords, height = 400, interactive = true
             function setupEarthView() {
               // Posicionar la cámara para ver el globo terráqueo centrado
               viewer.camera.setView({
-                destination: Cesium.Cartesian3.fromDegrees(20, 15, 2000000), // Reducido para ver el globo más grande
+                destination: Cesium.Cartesian3.fromDegrees(-5, 30, 1000000), // Reducido para ver el globo más grande
                 orientation: {
                   heading: 0.0,
-                  pitch: -0.3,
+                  pitch: -0.5,
                   roll: 0.0
                 }
               });
@@ -168,7 +168,7 @@ const LightWebCesiumMap = forwardRef(({ coords, height = 400, interactive = true
                     destination: Cesium.Cartesian3.fromDegrees(20, 15, message.height || 2000000),
                     orientation: {
                       heading: 0.0,
-                      pitch: -0.3,
+                      pitch: -0.5,
                       roll: 0.0
                     },
                     duration: 0
@@ -206,12 +206,17 @@ const LightWebCesiumMap = forwardRef(({ coords, height = 400, interactive = true
   `;
 
   return (
-    <View style={{ height, borderRadius: 12, overflow: 'hidden' }}>
+    <View style={{ 
+      height: typeof height === 'string' && height.includes('%') ? height as `${number}%` : typeof height === 'number' ? height : 'auto', 
+      borderRadius: 12, 
+      overflow: 'hidden', 
+      flex: 1 
+    }}>
       <WebView
         ref={webViewRef}
         originWhitelist={['*']}
         source={{ html: htmlContent }}
-        style={{ flex: 1, backgroundColor: 'black' }}
+        style={{ flex: 1, backgroundColor: 'black', width: '100%', height: '100%' }}
         onMessage={handleMessage}
         javaScriptEnabled={true}
         domStorageEnabled={true}
