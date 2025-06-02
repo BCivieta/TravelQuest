@@ -171,16 +171,6 @@ export default function EditarUsuario() {
           {/* Tarjeta de datos */}
           <View className="bg-white/90 rounded-2xl shadow-md p-6 space-y-5 mb-5">
 
-            {/* Email */}
-            <View>
-              <Text className="text-black font-semibold mb-2">📧 Correo electrónico:</Text>
-              <TextInput
-                value={email}
-                editable={false}
-                className="bg-gray-300 rounded-xl px-4 py-3 text-black"
-              />
-            </View>
-
             {/* Cambiar usuario */}
             <View>
               <Text className="text-black font-semibold mb-2 mt-3">👤 Nombre de usuario:</Text>

@@ -28,6 +28,18 @@ export default function OpcionesDeCrear() {
     router.push("/login/localizacion");
   };
 
+  // Función para navegar a la pantalla para elegir número de misiones
+  const irARetoNumero = () => {
+    if (!ubicacion?.cityId) {
+      Alert.alert("Error", "No se ha detectado ninguna ciudad.");
+      return;
+    }
+    router.push({
+      pathname: "../reto/retoNumero",
+      params: { cityId: ubicacion.cityId.toString() },
+    });
+  };
+
   return (
     <ImageBackground
       source={require('../../../assets/images/fondo.png')}
@@ -103,6 +115,20 @@ export default function OpcionesDeCrear() {
       <Text className="text-black text-2xl">→</Text>
     </View>
   </TouchableOpacity>
+
+   {/* Botón para crear reto con ruta de misiones */}
+          <TouchableOpacity
+            className="bg-white px-4 py-4 mb-3 rounded-xl border border-gray-200 shadow-sm"
+            onPress={irARetoNumero}
+          >
+            <View className="flex-row items-center justify-between">
+              <View>
+                <Text className="text-black font-bold text-lg">🗺️ Ruta de misiones</Text>
+                <Text className="text-black/60 text-sm">Crea un reto con varias misiones</Text>
+              </View>
+              <Text className="text-black text-2xl">→</Text>
+            </View>
+          </TouchableOpacity>
 
   {/* Botón escribir en diario */}
   <TouchableOpacity
