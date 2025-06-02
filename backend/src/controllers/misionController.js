@@ -4,7 +4,7 @@ import { validateImageByLabels, getImageLabels } from '../utils/validateImage.js
 import { updateUserLevel } from './usercontroller.js';
 
 // Add this import at the top of the file
-import { checkAndAwardAchievements } from '../controllers/logrocontroller.js';
+import { checkAndAwardAchievements } from '../controllers/logroController.js';
 
 
 export const updateUserMissionStatus = async (req, res) => {

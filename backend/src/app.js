@@ -1,4 +1,4 @@
-import userRoutes from './routes/userroutes.js';
+import userRoutes from './routes/userRoutes.js';
 import mensajeRoutes from './routes/MensajeRoutes.js';
 import conversationRoutes from './routes/conversationRoutes.js';
 

@@ -418,6 +418,7 @@ export default function Usuario() {
           }
         >
           {/* Add refresh achievements button */}
+          {/*
           <View className="mt-4 mb-2 flex-row justify-end">
             <TouchableOpacity 
               onPress={checkAchievements}
@@ -427,7 +428,7 @@ export default function Usuario() {
               <Text className="text-white ml-2 font-medium">Verificar logros</Text>
             </TouchableOpacity>
           </View>
-          
+          */}
           {/* Sección logros */}
           <View className="bg-white/80 p-4 rounded-2xl shadow-md">
             <Text className="text-black font-bold text-base mb-4">
@@ -437,7 +438,9 @@ export default function Usuario() {
             {loading ? (
               <ActivityIndicator size="large" color="#699D81" />
             ) : (
-              logros.map((logro) => (
+              logros
+              .sort((a, b) => parseInt(a.id) - parseInt(b.id))
+              .map((logro) => (
                 <View
                   key={logro.id}
                   className={`mb-4 p-3 rounded-xl ${

@@ -1,5 +1,5 @@
 import { supabase } from '../config/supabaseClient.js';
-import { LOGROS } from '../controllers/logrocontroller.js';
+import { LOGROS } from '../controllers/logroController.js';
 
 /**
  * Actualiza el nivel del usuario basado en sus logros y misiones completadas

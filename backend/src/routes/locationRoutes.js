@@ -1,6 +1,6 @@
 import express from 'express';
 import { getCityFromCoordinates, getCityFromName, saveUserLocation } from '../controllers/opcional/locationcontroller.js';
-import { checkAndAwardAchievements } from '../controllers/logrocontroller.js';
+import { checkAndAwardAchievements } from '../controllers/logroController.js';
 import { supabase } from '../config/supabaseClient.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 

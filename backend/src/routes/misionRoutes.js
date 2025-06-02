@@ -6,7 +6,7 @@ import {
     validateMissionImage,
     getMissionHistory,
     checkUserAchievements // Fixed: removed nested import and added directly to the list
-} from '../controllers/misioncontroller.js';
+} from '../controllers/misionController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
