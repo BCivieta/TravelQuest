@@ -2,7 +2,8 @@ import express from 'express';
 import {
   getActiveChallenge,
   generateChallengeWithMissions,
-  completeChallenge
+  completeChallenge,
+  discardActiveChallenge
 } from '../controllers/challengeController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
@@ -15,5 +16,6 @@ router.use(authMiddleware);
 router.get('/activo', getActiveChallenge);
 router.post('/generar', generateChallengeWithMissions);
 router.post('/:id/finalizar', completeChallenge);
+router.delete("/activo", discardActiveChallenge);
 
 export default router;

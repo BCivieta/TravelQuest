@@ -12,7 +12,7 @@ export const getActiveChallenge = async (req, res) => {
       .from('challenges')
       .select('*')
       .eq('created_by', userId)
-      .is('completed_at', null)
+      .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -65,7 +65,7 @@ export const generateChallengeWithMissions = async (req, res) => {
       .from('challenges')
       .select('id')
       .eq('created_by', userId)
-      .is('completed_at', null)
+      .eq('status', 'active')
       .maybeSingle();
 
     if (activeError) throw activeError;
@@ -79,36 +79,36 @@ export const generateChallengeWithMissions = async (req, res) => {
     if (cityError) throw cityError;
     const nombreCiudad = cityData.name;
 
-    // Crear reto
     const { data: reto, error: retoError } = await supabase
       .from('challenges')
-      .insert([{ title: `Reto en ${nombreCiudad}`, city_id: cityId, created_by: userId }])
+      .insert([{ 
+        title: `Reto en ${nombreCiudad}`, 
+        city_id: cityId, 
+        created_by: userId,
+        status: 'active' // ✅ Nuevo campo
+      }])
       .select()
-      .maybeSingle();
-    //depurar
-    console.log("🧾 Resultado reto:", reto);
-    console.log("❌ Error insertando reto:", retoError);
-    //depurar
+      .single();
 
-    if (retoError) throw retoError;
+    if (retoError || !reto) throw retoError;
 
-    // Generar misiones ordenadas con IA
     const iaMissions = await generateChallengeRoute(nombreCiudad, totalMissions);
+    if (!Array.isArray(iaMissions)) throw new Error("La IA no devolvió un array válido de misiones");
 
-    // DEBUG: IA
-    console.log("🧠 Misiones generadas por IA:", JSON.stringify(iaMissions, null, 2));
-    if (!Array.isArray(iaMissions)) {
-      console.error("⚠️ El resultado de la IA no es un array:", iaMissions);
-      throw new Error("La IA no devolvió un array válido de misiones");
-    }
-    //debug
     const misionesCreadas = [];
 
     for (const mision of iaMissions) {
       const dificultadMap = { facil: 1, media: 3, dificil: 5 };
       const dificultad = dificultadMap[mision.difficulty] || 3;
-
-      // Insertar misión
+      console.log("🧾 Datos misión a insertar:", {
+    city_id: cityId,
+    title: mision.title,
+    description: mision.description,
+    difficulty: dificultad,
+    keywords: mision.keywords,
+    nombre_objeto: mision.nombre_objeto,
+    historia: mision.historia,
+  });
       const { data: m, error: mError } = await supabase
         .from('missions')
         .insert([{
@@ -122,9 +122,12 @@ export const generateChallengeWithMissions = async (req, res) => {
         }])
         .select()
         .single();
-      if (mError) throw mError;
 
-      // Insertar en user_missions
+      if (mError) {
+      console.error("❌ Error insertando misión:", mError.details || mError.message || mError);
+      continue; // evita que la app reviente si una misión falla
+    }
+
       const { error: umError } = await supabase
         .from('user_missions')
         .insert([{
@@ -132,8 +135,11 @@ export const generateChallengeWithMissions = async (req, res) => {
           mission_id: m.id,
           challenge_id: reto.id,
         }]);
-      if (umError) throw umError;
 
+      if (umError) {
+      console.error("❌ Error insertando en user_missions:", umError.details || umError.message || umError);
+      continue;
+    }
       misionesCreadas.push(m);
     }
 
@@ -154,7 +160,10 @@ export const completeChallenge = async (req, res) => {
   try {
     const { error } = await supabase
       .from('challenges')
-      .update({ completed_at: new Date().toISOString() })
+      .update({ 
+        completed_at: new Date().toISOString(),
+        status: 'completed' // ✅ Estado actualizado
+      })
       .eq('id', challengeId)
       .eq('created_by', userId);
 
@@ -164,5 +173,31 @@ export const completeChallenge = async (req, res) => {
   } catch (error) {
     console.error("❌ Error al finalizar reto:", error.message);
     res.status(500).json({ message: "No se pudo finalizar el reto" });
+  }
+};
+
+/**
+ * DELETE /api/retos/activo
+ */
+export const discardActiveChallenge = async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ message: "No autenticado" });
+
+  try {
+    const { error } = await supabase
+      .from("challenges")
+      .update({ 
+        completed_at: new Date().toISOString(),
+        status: 'discarded' // ✅ Estado actualizado
+      })
+      .eq("created_by", userId)
+      .eq("status", "active");
+
+    if (error) throw error;
+
+    res.status(200).json({ message: "Reto descartado correctamente" });
+  } catch (error) {
+    console.error("❌ Error descartando reto:", error.message);
+    res.status(500).json({ message: "Error al descartar reto" });
   }
 };
