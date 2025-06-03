@@ -2,6 +2,161 @@ import { supabase } from '../config/supabaseClient.js';
 import { generateChallengeRoute } from '../ia/generateChallengeRoute.js';
 
 /**
+ * POST /api/retos/generar
+ */
+export const generateChallengeWithMissions = async (req, res) => {
+  const userId = req.user?.id;
+  const { cityId, totalMissions } = req.body;
+
+  if (!userId || !cityId || !totalMissions) {
+    return res.status(400).json({ message: "Faltan parámetros necesarios" });
+  }
+
+  try {
+    const { data: active, error: activeError } = await supabase
+      .from('challenges')
+      .select('id')
+      .eq('created_by', userId)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (activeError) throw activeError;
+    if (active) return res.status(409).json({ message: "Ya tienes un reto activo" });
+
+    const { data: cityData, error: cityError } = await supabase
+      .from("cities")
+      .select("name")
+      .eq("id", cityId)
+      .single();
+    if (cityError) throw cityError;
+    const nombreCiudad = cityData.name;
+
+    const { data: reto, error: retoError } = await supabase
+      .from('challenges')
+      .insert([{ 
+        title: `Reto en ${nombreCiudad}`, 
+        city_id: cityId, 
+        created_by: userId,
+        status: 'active'
+      }])
+      .select()
+      .single();
+
+    if (retoError || !reto) throw retoError;
+
+    const iaMissions = await generateChallengeRoute(nombreCiudad, totalMissions);
+    if (!Array.isArray(iaMissions)) throw new Error("La IA no devolvió un array válido de misiones");
+
+    const misionesCreadas = [];
+
+    for (const mision of iaMissions) {
+      const dificultadMap = { facil: 1, media: 3, dificil: 5 };
+      const dificultad = dificultadMap[mision.difficulty] || 3;
+
+      if (!Array.isArray(mision.keywords)) {
+        console.warn("⚠️ keywords no es un array. Se forzará a array vacío.");
+        mision.keywords = [];
+      }
+
+      console.log("🧾 Misión IA:", mision);
+
+      const { data: misionInsertada, error: mError } = await supabase
+        .from('missions')
+        .insert([{
+          city_id: cityId,
+          title: mision.title,
+          description: mision.description,
+          difficulty: dificultad,
+          keywords: mision.keywords,
+          nombre_objeto: mision.nombre_objeto,
+          historia: mision.historia,
+        }])
+        .select()
+        .single();
+
+      if (mError || !misionInsertada?.id) {
+        console.error("❌ Error insertando misión:", mError?.details || mError?.message || mError);
+        continue;
+      }
+
+      console.log("✅ Misión guardada con ID:", misionInsertada.id);
+
+      const { error: umError } = await supabase
+        .from('user_missions')
+        .insert([{
+          user_id: userId,
+          mission_id: misionInsertada.id,
+          challenge_id: reto.id,
+        }]);
+
+      if (umError) {
+        console.error("❌ Error insertando en user_missions:", umError.details || umError.message || umError);
+        continue;
+      }
+
+      misionesCreadas.push(misionInsertada);
+    }
+
+    res.status(201).json({ id: reto.id, missions: misionesCreadas });
+  } catch (error) {
+    console.error("❌ Error generando reto:", error.message || error);
+    res.status(500).json({ message: "Error al generar reto", error: error.message });
+  }
+};
+
+/**
+ * POST /api/retos/:id/finalizar
+ */
+export const completeChallenge = async (req, res) => {
+  const userId = req.user?.id;
+  const challengeId = req.params.id;
+
+  try {
+    const { error } = await supabase
+      .from('challenges')
+      .update({ 
+        completed_at: new Date().toISOString(),
+        status: 'completed'
+      })
+      .eq('id', challengeId)
+      .eq('created_by', userId);
+
+    if (error) throw error;
+
+    res.status(200).json({ message: "Reto finalizado correctamente" });
+  } catch (error) {
+    console.error("❌ Error al finalizar reto:", error.message);
+    res.status(500).json({ message: "No se pudo finalizar el reto" });
+  }
+};
+
+/**
+ * DELETE /api/retos/activo
+ */
+export const discardActiveChallenge = async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ message: "No autenticado" });
+
+  try {
+    const { error } = await supabase
+      .from("challenges")
+      .update({ 
+        completed_at: new Date().toISOString(),
+        status: 'discarded'
+      })
+      .eq("created_by", userId)
+      .eq("status", "active");
+
+    if (error) throw error;
+
+    res.status(200).json({ message: "Reto descartado correctamente" });
+  } catch (error) {
+    console.error("❌ Error descartando reto:", error.message);
+    res.status(500).json({ message: "Error al descartar reto" });
+  }
+};
+
+/**
  * GET /api/retos/activo
  */
 export const getActiveChallenge = async (req, res) => {
@@ -46,165 +201,5 @@ export const getActiveChallenge = async (req, res) => {
   } catch (error) {
     console.error("❌ Error al obtener reto activo:", error.message);
     res.status(500).json({ message: "Error al obtener reto activo" });
-  }
-};
-
-/**
- * POST /api/retos/generar
- */
-export const generateChallengeWithMissions = async (req, res) => {
-  
-  console.log("📥 POST /retos/generar recibido con userId:", userId, "cityId:", cityId, "totalMissions:", totalMissions);
-
-  const userId = req.user?.id;
-  const { cityId, totalMissions } = req.body;
-
-  if (!userId || !cityId || !totalMissions) {
-    return res.status(400).json({ message: "Faltan parámetros necesarios" });
-  }
-
-  try {
-    const { data: active, error: activeError } = await supabase
-      .from('challenges')
-      .select('id')
-      .eq('created_by', userId)
-      .eq('status', 'active')
-      .maybeSingle();
-
-    if (activeError) throw activeError;
-    if (active) return res.status(409).json({ message: "Ya tienes un reto activo" });
-
-    const { data: cityData, error: cityError } = await supabase
-      .from("cities")
-      .select("name")
-      .eq("id", cityId)
-      .single();
-    if (cityError) throw cityError;
-    const nombreCiudad = cityData.name;
-
-    const { data: reto, error: retoError } = await supabase
-      .from('challenges')
-      .insert([{ 
-        title: `Reto en ${nombreCiudad}`, 
-        city_id: cityId, 
-        created_by: userId,
-        status: 'active' // ✅ Nuevo campo
-      }])
-      .select()
-      .single();
-
-    if (retoError || !reto) throw retoError;
-
-    const iaMissions = await generateChallengeRoute(nombreCiudad, totalMissions);
-    if (!Array.isArray(iaMissions)) throw new Error("La IA no devolvió un array válido de misiones");
-
-    const misionesCreadas = [];
-
-    for (const mision of iaMissions) {
-      const dificultadMap = { facil: 1, media: 3, dificil: 5 };
-      const dificultad = dificultadMap[mision.difficulty] || 3;
-      console.log("🧾 Datos misión a insertar:", {
-    city_id: cityId,
-    title: mision.title,
-    description: mision.description,
-    difficulty: dificultad,
-    keywords: mision.keywords,
-    nombre_objeto: mision.nombre_objeto,
-    historia: mision.historia,
-  });
-  if (!Array.isArray(mision.keywords)) {
-  console.warn("⚠️ keywords no es un array. Se convertirá a array vacío.");
-  mision.keywords = [];
-}
-      const { data: m, error: mError } = await supabase
-        .from('missions')
-        .insert([{
-          city_id: cityId,
-          title: mision.title,
-          description: mision.description,
-          difficulty: dificultad,
-          keywords: mision.keywords ?? [],
-          nombre_objeto: mision.nombre_objeto,
-          historia: mision.historia,
-        }])
-        .select()
-        .single();
-
-      if (mError) {
-      console.error("❌ Error insertando misión:", mError.details || mError.message || mError);
-      continue; // evita que la app reviente si una misión falla
-    }
-
-      const { error: umError } = await supabase
-        .from('user_missions')
-        .insert([{
-          user_id: userId,
-          mission_id: m.id,
-          challenge_id: reto.id,
-        }]);
-
-      if (umError) {
-      console.error("❌ Error insertando en user_missions:", umError.details || umError.message || umError);
-      continue;
-    }
-      misionesCreadas.push(m);
-    }
-
-    res.status(201).json({ id: reto.id, missions: misionesCreadas });
-  } catch (error) {
-    console.error("❌ Error generando reto:", error.message);
-    res.status(500).json({ message: "Error al generar reto", error: error.message });
-  }
-};
-
-/**
- * POST /api/retos/:id/finalizar
- */
-export const completeChallenge = async (req, res) => {
-  const userId = req.user?.id;
-  const challengeId = req.params.id;
-
-  try {
-    const { error } = await supabase
-      .from('challenges')
-      .update({ 
-        completed_at: new Date().toISOString(),
-        status: 'completed' // ✅ Estado actualizado
-      })
-      .eq('id', challengeId)
-      .eq('created_by', userId);
-
-    if (error) throw error;
-
-    res.status(200).json({ message: "Reto finalizado correctamente" });
-  } catch (error) {
-    console.error("❌ Error al finalizar reto:", error.message);
-    res.status(500).json({ message: "No se pudo finalizar el reto" });
-  }
-};
-
-/**
- * DELETE /api/retos/activo
- */
-export const discardActiveChallenge = async (req, res) => {
-  const userId = req.user?.id;
-  if (!userId) return res.status(401).json({ message: "No autenticado" });
-
-  try {
-    const { error } = await supabase
-      .from("challenges")
-      .update({ 
-        completed_at: new Date().toISOString(),
-        status: 'discarded' // ✅ Estado actualizado
-      })
-      .eq("created_by", userId)
-      .eq("status", "active");
-
-    if (error) throw error;
-
-    res.status(200).json({ message: "Reto descartado correctamente" });
-  } catch (error) {
-    console.error("❌ Error descartando reto:", error.message);
-    res.status(500).json({ message: "Error al descartar reto" });
   }
 };

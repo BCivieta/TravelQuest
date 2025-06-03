@@ -55,6 +55,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/ajustes', ajustesRoutes);
 app.use('/api/logros', logrosRoutes);
 app.use('/api/retos', retoRoutes);
+console.log("🧩 Rutas de retos importadas desde challengeRoutes");
+
 
 app.use('/api/travel_days', travelDaysRoutes);
 app.use('/api/conversations', conversationRoutes);

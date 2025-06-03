@@ -13,9 +13,11 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // Rutas de retos
-router.get('/activo', getActiveChallenge);
 router.post('/generar', generateChallengeWithMissions);
+router.get('/activo', getActiveChallenge);
 router.post('/:id/finalizar', completeChallenge);
 router.delete("/activo", discardActiveChallenge);
 
 export default router;
+console.log("✅ Rutas de /api/retos cargadas");
+

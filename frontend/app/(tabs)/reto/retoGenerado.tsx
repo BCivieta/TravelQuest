@@ -97,7 +97,7 @@ export default function RetoGenerado() {
 
   const handlePress = (mission: Mission) => {
     router.push({
-      pathname: "./misiones/detalleMisionReto",
+      pathname: "/(tabs)/reto/detalleMisionReto",
       params: {
         missionId: mission.id.toString(),
         title: mission.title,
