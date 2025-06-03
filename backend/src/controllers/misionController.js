@@ -382,6 +382,22 @@ export const checkUserAchievements = async (req, res) => {
     res.status(500).json({ error: "Error al verificar logros" });
   }
 };
+export const getMissionById = async (req, res) => {
+  const missionId = req.params.id;
+
+  const { data, error } = await supabase
+    .from("missions")
+    .select("*")
+    .eq("id", missionId)
+    .single();
+
+  if (error) {
+    console.error("❌ Error al obtener misión:", error.message);
+    return res.status(500).json({ message: "Error al obtener misión" });
+  }
+
+  res.status(200).json(data);
+};
 
 // Make sure the checkAndAwardAchievements function is defined or imported
 // If it's not defined, you'll need to implement it or import it

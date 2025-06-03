@@ -1,13 +1,23 @@
-import { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Alert, ImageBackground, ActivityIndicator } from "react-native";
+import { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  ImageBackground,
+  ActivityIndicator,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { apiFetch } from "../../../lib/api";
+import { useFocusEffect } from "@react-navigation/native";
 
 type Mission = {
   id: number;
   title: string;
   difficulty: number;
+  description: string;
   status: "accepted" | "completed";
   created_at: string;
   completed_at: string | null;
@@ -44,9 +54,11 @@ export default function RetoGenerado() {
     }
   };
 
-  useEffect(() => {
-    fetchChallenge();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchChallenge();
+    }, [])
+  );
 
   const getPoints = (missions: Mission[]) =>
     missions.reduce((total, m) => total + m.difficulty * 10, 0);
@@ -81,7 +93,8 @@ export default function RetoGenerado() {
           onPress: async () => {
             setActionLoading(true);
             try {
-              const res = await apiFetch(`/retos/${challenge?.id}/descartar`, { method: "POST" });
+              const res = await apiFetch("/retos/activo", { method: "DELETE" });
+;
               if (!res.ok) throw new Error("No se pudo descartar el reto");
               setChallenge(null);
             } catch (err) {
@@ -101,8 +114,14 @@ export default function RetoGenerado() {
       params: {
         missionId: mission.id.toString(),
         title: mission.title,
+        description: mission.description,
+        difficulty: mission.difficulty,
       },
     });
+  };
+
+  const handleCrearReto = () => {
+    router.push("/(tabs)/reto/retoNumero");
   };
 
   const renderMission = (mission: Mission, index: number) => {
@@ -162,12 +181,32 @@ export default function RetoGenerado() {
       resizeMode="cover"
     >
       <View className="flex-1 px-4 pt-20">
+        {/* Botón flotante arriba izquierda para descartar */}
+        {challenge && (
+          <TouchableOpacity
+            onPress={handleDescartarReto}
+            className="absolute top-10 right-4 mt-10 z-10 bg-red-600 px-3 py-2 rounded-xl shadow-md"
+            disabled={actionLoading}
+          >
+            <Text className="text-white font-bold text-sm">Descartar reto</Text>
+          </TouchableOpacity>
+        )}
+
         {loading ? (
           <ActivityIndicator size="large" color="black" />
         ) : !challenge ? (
-          <Text className="text-black font-bold text-lg text-center mt-10">
-            🛑 No hay ningún reto activo actualmente.
-          </Text>
+          <>
+            <Text className="text-black font-bold text-lg text-center mt-10">
+              🛑 No hay ningún reto activo actualmente.
+            </Text>
+
+            <TouchableOpacity
+              onPress={handleCrearReto}
+              className="bg-blue-600 py-4 px-6 rounded-xl mt-10 mx-auto"
+            >
+              <Text className="text-white font-bold text-lg text-center">➕ Crear nuevo reto</Text>
+            </TouchableOpacity>
+          </>
         ) : (
           <>
             {allCompleted && (
@@ -176,7 +215,7 @@ export default function RetoGenerado() {
                   🎉 ¡Reto completado!
                 </Text>
                 <Text className="text-black text-base text-center mb-4">
-                  Has ganado {" "}
+                  Has ganado{" "}
                   <Text className="font-bold text-green-700">
                     {getPoints(challenge.missions)} puntos
                   </Text>
@@ -195,26 +234,17 @@ export default function RetoGenerado() {
                 </TouchableOpacity>
               </View>
             )}
-
-            <Text className="text-black font-bold text-xl mb-4">🧩 Misiones del reto</Text>
+              <View className="bg-white/80 px-4 py-2 rounded-xl shadow-md self-start mb-10 flex-row items-center gap-2">
+                  <Text className="text-black text-lg font-semibold">🧩 Misiones del reto</Text>
+                  <Text className="text-black text-lg">🗺️</Text>
+              </View>
+            
             <ScrollView contentContainerStyle={{ paddingBottom: 160 }}>
               {challenge.missions.map((m, i) => renderMission(m, i))}
             </ScrollView>
-            <TouchableOpacity
-              onPress={handleDescartarReto}
-              className="bg-red-600 py-3 px-4 rounded-xl mt-4"
-              disabled={actionLoading}
-            >
-              {actionLoading ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text className="text-white text-center font-bold">Descartar reto</Text>
-              )}
-            </TouchableOpacity>
           </>
         )}
       </View>
     </ImageBackground>
   );
 }
-

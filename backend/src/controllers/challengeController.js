@@ -181,16 +181,18 @@ export const getActiveChallenge = async (req, res) => {
         mission_id,
         status,
         completed_at,
-        missions ( id, title, difficulty, created_at )
+        missions ( id, title, difficulty, created_at, description )
       `)
       .eq('user_id', userId)
-      .eq('challenge_id', challenge.id);
+      .eq('challenge_id', challenge.id)
+      .order('created_at', { foreignTable: 'missions' });
 
     if (missionsError) throw missionsError;
 
     const missions = missionsData.map(m => ({
       id: m.missions.id,
       title: m.missions.title,
+      description: m.missions.description,
       difficulty: m.missions.difficulty,
       created_at: m.missions.created_at,
       completed_at: m.completed_at,
@@ -203,3 +205,5 @@ export const getActiveChallenge = async (req, res) => {
     res.status(500).json({ message: "Error al obtener reto activo" });
   }
 };
+
+
