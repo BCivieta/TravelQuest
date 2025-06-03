@@ -53,6 +53,9 @@ export const getActiveChallenge = async (req, res) => {
  * POST /api/retos/generar
  */
 export const generateChallengeWithMissions = async (req, res) => {
+  
+  console.log("📥 POST /retos/generar recibido con userId:", userId, "cityId:", cityId, "totalMissions:", totalMissions);
+
   const userId = req.user?.id;
   const { cityId, totalMissions } = req.body;
 
@@ -109,6 +112,10 @@ export const generateChallengeWithMissions = async (req, res) => {
     nombre_objeto: mision.nombre_objeto,
     historia: mision.historia,
   });
+  if (!Array.isArray(mision.keywords)) {
+  console.warn("⚠️ keywords no es un array. Se convertirá a array vacío.");
+  mision.keywords = [];
+}
       const { data: m, error: mError } = await supabase
         .from('missions')
         .insert([{
@@ -116,7 +123,7 @@ export const generateChallengeWithMissions = async (req, res) => {
           title: mision.title,
           description: mision.description,
           difficulty: dificultad,
-          keywords: mision.keywords,
+          keywords: mision.keywords ?? [],
           nombre_objeto: mision.nombre_objeto,
           historia: mision.historia,
         }])
