@@ -339,7 +339,7 @@ export default function Usuario() {
     setRefreshing(false);
   };
 
-  return (
+   return (
     <ImageBackground
       source={require("../../../assets/images/fondo.png")}
       style={{ flex: 1 }}

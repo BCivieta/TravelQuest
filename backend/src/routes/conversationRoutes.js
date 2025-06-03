@@ -10,6 +10,10 @@ router.get('/details/:id', conversationController.getConversationDetails);
 router.get('/user/:userId', conversationController.getUserConversations);
 router.get('/:userId', conversationController.getUserConversations);
 
+// Rutas para aceptar y rechazar conversaciones (requieren autenticación)
+router.put('/:id/accept', authMiddleware, conversationController.acceptConversation);
+router.put('/:id/reject', authMiddleware, conversationController.rejectConversation);
+
 // También podríamos agregar versiones protegidas:
 // router.post('/', authMiddleware, conversationController.createConversation);
 // router.get('/details/:id', authMiddleware, conversationController.getConversationDetails);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Image, Alert, ActivityIndicator, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Image, Alert, ActivityIndicator, SafeAreaView, ScrollView, ImageBackground } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { apiFetch } from '../../../lib/api';
 import { Ionicons } from '@expo/vector-icons';
@@ -63,6 +63,8 @@ export default function ChatScreen() {
   const [otherUser, setOtherUser] = useState<{ nombre: string; foto_perfil?: string; id: string } | null>(null);
   const [isConversation, setIsConversation] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationStatus, setConversationStatus] = useState<string>('accepted');
+  const [isCreator, setIsCreator] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -122,6 +124,8 @@ export default function ChatScreen() {
                 const convData = await convRes.json();
                 console.log("✅ Conversación creada/encontrada:", convData);
                 setConversationId(convData.id);
+                setConversationStatus(convData.status || 'accepted');
+                setIsCreator(convData.created_by === currentUserId);
                 setTimeout(fetchMessages, 500);
               } else {
                 console.error("❌ Error al crear conversación");
@@ -351,8 +355,21 @@ export default function ChatScreen() {
   };
 
   const sendMessage = async () => {
-    // Si no hay texto, no hacer nada
-    if (!input.trim()) {
+    if (!input.trim() || !conversationId || !userId) return;
+    
+    // No permitir enviar mensajes si la conversación está pendiente
+    if (conversationStatus === 'pending') {
+      if (isCreator) {
+        Alert.alert("Chat pendiente", "El destinatario aún no ha aceptado tu solicitud de chat.");
+      } else {
+        Alert.alert("Chat pendiente", "Primero debes aceptar esta solicitud de chat para poder conversar.");
+      }
+      return;
+    }
+    
+    // No permitir enviar mensajes si la conversación fue rechazada
+    if (conversationStatus === 'rejected') {
+      Alert.alert("Chat rechazado", "Esta solicitud de chat ha sido rechazada.");
       return;
     }
     
@@ -488,31 +505,59 @@ export default function ChatScreen() {
   // Función para obtener información actualizada del otro usuario
   const fetchOtherUserInfo = async (conversationId: string, currentUserId: string) => {
     try {
-      const convRes = await apiFetch(`/conversations/details/${conversationId}`);
-      if (convRes.ok) {
-        const convData = await convRes.json();
-        console.log("✅ Detalles de conversación:", convData);
+      console.log("🔍 Buscando información de conversación:", conversationId);
+      const res = await apiFetch(`/conversations/details/${conversationId}`);
+      
+      if (!res.ok) {
+        console.error("❌ Error al obtener detalles de conversación");
         
-        // Determinar cuál es el otro usuario
-        const otherUserId = convData.user_1_id === currentUserId 
-          ? convData.user_2_id 
-          : convData.user_1_id;
-        
-        // Buscar información del otro usuario
-        const userRes = await apiFetch(`/users/${otherUserId}`);
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          console.log("✅ Información actualizada del usuario:", userData);
-          setOtherUser(userData);
-        } else {
-          // Si no podemos obtener el usuario, usar un valor por defecto
-          setOtherUser({ id: otherUserId, nombre: 'Usuario' });
+        // Si el error es 404, significa que la conversación fue rechazada y eliminada
+        if (res.status === 404) {
+          Alert.alert(
+            "Chat no disponible", 
+            "Este chat ya no existe. Es posible que haya sido rechazado o eliminado.",
+            [{ text: "Volver", onPress: () => router.push('/(tabs)/mensajeria') }]
+          );
         }
-        return true;
+        
+        return false;
       }
-      return false;
+      
+      const conversation = await res.json();
+      console.log("✅ Detalles de conversación:", conversation);
+      
+      // Determinar cuál es el otro usuario en la conversación
+      const otherUserId = conversation.user_1_id === currentUserId 
+        ? conversation.user_2_id 
+        : conversation.user_1_id;
+      
+      // Guardar el estado de la conversación
+      setConversationStatus(conversation.status || 'accepted');
+      setIsCreator(conversation.created_by === currentUserId);
+      
+      console.log("🔍 Buscando información del otro usuario:", otherUserId);
+      const userRes = await apiFetch(`/users/${otherUserId}`);
+      
+      if (!userRes.ok) {
+        console.error("❌ Error al obtener información del usuario");
+        return false;
+      }
+      
+      const userData = await userRes.json();
+      console.log("✅ Datos del otro usuario:", userData);
+      setOtherUser(userData);
+      
+      return true;
     } catch (err) {
-      console.error("❌ Error al obtener detalles de conversación:", err);
+      console.error("❌ Error general al obtener información de usuario:", err);
+      
+      // Si hay un error al obtener información, redirigir al usuario
+      Alert.alert(
+        "Error", 
+        "No se pudo obtener información del chat. Volviendo a la lista de chats.",
+        [{ text: "Aceptar", onPress: () => router.push('/(tabs)/mensajeria') }]
+      );
+      
       return false;
     }
   };
@@ -530,153 +575,202 @@ export default function ChatScreen() {
   }, [conversationId, userId]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'white' }}>
-      {/* Header */}
-      <View style={{ 
-        flexDirection: 'row', 
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 12, 
-        borderBottomWidth: 1, 
-        borderColor: '#eee',
-        marginTop: Platform.OS === 'ios' ? 40 : 10 
-      }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity 
-            onPress={() => router.push('/(tabs)/mensajeria')}
-            style={{ marginRight: 10 }}
-          >
-            <Ionicons name="chevron-back" size={28} color="#C76F40" />
-          </TouchableOpacity>
-          {otherUser?.foto_perfil ? (
-            <Image 
-              source={{ uri: otherUser.foto_perfil }} 
-              style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#fff3e9' }} 
-              defaultSource={require('../../../assets/images/avatar.png')}
-            />
-          ) : (
-            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#fff3e9', justifyContent: 'center', alignItems: 'center' }}>
-              <Image
-                source={require('../../../assets/images/avatar.png')}
-                style={{ width: 40, height: 40, borderRadius: 20 }}
-              />
+    <ImageBackground  source={require("../../../assets/images/fondo.png")}
+    style={{ flex: 1 }}
+    resizeMode="cover"
+    >
+        <View style={{ flex: 1}}>
+          {/* Header */}
+          <View style={{ 
+            flexDirection: 'row', 
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: 12, 
+            borderBottomWidth: 1, 
+            borderColor: '#eee',
+            marginTop: Platform.OS === 'ios' ? 40 : 10 
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity 
+                onPress={() => router.push('/(tabs)/mensajeria')}
+                style={{ marginRight: 10 }}
+              >
+                <Ionicons name="chevron-back" size={28} color="#FEF7FF" />
+              </TouchableOpacity>
+              {otherUser?.foto_perfil ? (
+                <Image 
+                  source={{ uri: otherUser.foto_perfil }} 
+                  style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#fff3e9' }} 
+                  defaultSource={require('../../../assets/images/avatar.png')}
+                />
+              ) : (
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#fff3e9', justifyContent: 'center', alignItems: 'center' }}>
+                  <Image
+                    source={require('../../../assets/images/avatar.png')}
+                    style={{ width: 40, height: 40, borderRadius: 20 }}
+                  />
+                </View>
+              )}
+              <Text style={{ 
+                fontSize: 20, 
+                fontWeight: 'bold', 
+                color: '#FEF7FF', 
+                marginLeft: 12 
+              }}>
+                {otherUser?.nombre || 'Usuario'}
+              </Text>
+            </View>
+          </View>
+
+          {/* Mensaje de chat pendiente */}
+          {conversationStatus === 'pending' && (
+            <View style={{
+              backgroundColor: '#FFF8E1',
+              padding: 16,
+              marginHorizontal: 16,
+              marginTop: 16,
+              borderRadius: 8,
+              borderLeftWidth: 4,
+              borderLeftColor: '#FFAB40',
+              flexDirection: 'row',
+              alignItems: 'center'
+            }}>
+              <Ionicons name="alert-circle" size={24} color="#FFAB40" style={{ marginRight: 8 }} />
+              <Text style={{ flex: 1, color: '#333' }}>
+                {isCreator 
+                  ? 'Has enviado una solicitud de chat. Espera a que el destinatario la acepte.' 
+                  : 'Has recibido una solicitud de chat. Ve a "Chats creados" para aceptarla o rechazarla.'}
+              </Text>
             </View>
           )}
-          <Text style={{ 
-            fontSize: 20, 
-            fontWeight: 'bold', 
-            color: '#C76F40', 
-            marginLeft: 12 
-          }}>
-            {otherUser?.nombre || 'Usuario'}
-          </Text>
-        </View>
-      </View>
 
-      {/* Messages Area - Flex:1 takes all available space */}
-      <View style={{ 
-        flex: 1, 
-        backgroundColor: '#f9f9f9',
-        paddingBottom: Platform.OS === 'ios' ? 160 : 140
-      }}>
-        {loading && !initialLoadComplete ? (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator size="large" color="#C76F40" />
-            <Text style={{ marginTop: 10, color: '#C76F40' }}>Cargando...</Text>
-          </View>
-        ) : messages.length === 0 ? (
+          {/* Mensaje de chat rechazado */}
+          {conversationStatus === 'rejected' && (
+            <View style={{
+              backgroundColor: '#FFEBEE',
+              padding: 16,
+              marginHorizontal: 16,
+              marginTop: 16,
+              borderRadius: 8,
+              borderLeftWidth: 4,
+              borderLeftColor: '#F44336',
+              flexDirection: 'row',
+              alignItems: 'center'
+            }}>
+              <Ionicons name="close-circle" size={24} color="#F44336" style={{ marginRight: 8 }} />
+              <Text style={{ flex: 1, color: '#333' }}>
+                {isCreator 
+                  ? 'El destinatario ha rechazado tu solicitud de chat.' 
+                  : 'Has rechazado esta solicitud de chat.'}
+              </Text>
+            </View>
+          )}
+
+          {/* Messages Area - Flex:1 takes all available space */}
           <View style={{ 
             flex: 1, 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            marginBottom: Platform.OS === 'ios' ? 80 : 60
+            backgroundColor: '#f9f9f9',
+            paddingBottom: Platform.OS === 'ios' ? 160 : 140
           }}>
-            <Ionicons name="chatbubble-ellipses-outline" size={60} color="#C76F40" />
-            <Text style={{ 
-              marginTop: 16, 
-              fontSize: 18, 
-              fontWeight: 'bold', 
-              color: '#C76F40' 
-            }}>
-              No hay mensajes aún
-            </Text>
-            <Text style={{ fontSize: 14, color: '#888', marginBottom: 70 }}>
-              ¡Envía el primer mensaje!
-            </Text>
+            {loading && !initialLoadComplete ? (
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#403796" />
+                <Text style={{ marginTop: 10, color: '#403796' }}>Cargando...</Text>
+              </View>
+            ) : messages.length === 0 ? (
+              <View style={{ 
+                flex: 1, 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                marginBottom: Platform.OS === 'ios' ? 80 : 60
+              }}>
+                <Ionicons name="chatbubble-ellipses-outline" size={60} color="#C76F40" />
+                <Text style={{ 
+                  marginTop: 16, 
+                  fontSize: 18, 
+                  fontWeight: 'bold', 
+                  color: '#403796' 
+                }}>
+                  No hay mensajes aún
+                </Text>
+                <Text style={{ fontSize: 14, color: '#888', marginBottom: 70 }}>
+                  ¡Envía el primer mensaje!
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                ref={flatListRef}
+                data={messages}
+                keyExtractor={item => item.id?.toString() || Math.random().toString()}
+                renderItem={renderItem}
+                contentContainerStyle={{ padding: 16, paddingBottom: Platform.OS === 'ios' ? 160 : 140 }}
+                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+              />
+            )}
           </View>
-        ) : (
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            keyExtractor={item => item.id?.toString() || Math.random().toString()}
-            renderItem={renderItem}
-            contentContainerStyle={{ padding: 16, paddingBottom: Platform.OS === 'ios' ? 160 : 140 }}
-            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-            onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
-          />
-        )}
-      </View>
 
-      {/* Fixed Input Bar - Height: 60 ensures visibility */}
-      <View style={{ 
-        height: 70, 
-        borderTopWidth: 2, 
-        borderColor: '#C76F40', 
-        backgroundColor: '#fff', 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        padding: 10,
-        paddingBottom: Platform.OS === 'ios' ? 20 : 10,
-        position: 'absolute',
-        bottom: Platform.OS === 'ios' ? 80 : 60,
-        left: 0,
-        right: 0,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 5,
-        zIndex: 1000
-      }}>
-        <TextInput
-          style={{ 
-            flex: 1, 
-            height: 45, 
-            backgroundColor: '#f5f5f5', 
-            borderRadius: 22, 
-            paddingHorizontal: 15, 
-            marginRight: 10,
-            fontSize: 16,
-            borderWidth: 1,
-            borderColor: '#ddd'
-          }}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Escribe un mensaje..."
-          placeholderTextColor="#999"
-          autoFocus={messages.length === 0}
-        />
-        <TouchableOpacity 
-          style={{ 
-            backgroundColor: !input.trim() ? '#ccc' : '#C76F40', 
-            width: 45, 
-            height: 45, 
-            borderRadius: 22, 
-            justifyContent: 'center', 
-            alignItems: 'center',
+          {/* Fixed Input Bar - Height: 60 ensures visibility */}
+          <View style={{ 
+            height: 70, 
+            borderTopWidth: 2, 
+            borderColor: '#403796', 
+            backgroundColor: '#fff', 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            padding: 10,
+            paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+            position: 'absolute',
+            bottom: Platform.OS === 'ios' ? 80 : 60,
+            left: 0,
+            right: 0,
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.2,
-            shadowRadius: 2,
-            elevation: 2
-          }} 
-          onPress={sendMessage}
-          disabled={!input.trim()}
-        >
-          <Ionicons name="send" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-    </View>
+            shadowOffset: { width: 0, height: -3 },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+            elevation: 5,
+            zIndex: 1000
+          }}>
+            <TextInput
+              style={{ 
+                flex: 1, 
+                height: 45, 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 22, 
+                paddingHorizontal: 15, 
+                marginRight: 10,
+                fontSize: 16,
+                borderWidth: 1,
+                borderColor: '#ddd'
+              }}
+              value={input}
+              onChangeText={setInput}
+              placeholder="Escribe un mensaje..."
+              placeholderTextColor="#999"
+              autoFocus={messages.length === 0}
+            />
+            <TouchableOpacity 
+              style={{ 
+                backgroundColor: !input.trim() ? '#ccc' : '#C76F40', 
+                width: 45, 
+                height: 45, 
+                borderRadius: 22, 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 2,
+                elevation: 2
+              }} 
+              onPress={sendMessage}
+              disabled={!input.trim()}
+            >
+              <Ionicons name="send" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ImageBackground>
   );
 }
 
