@@ -15,19 +15,23 @@ export default function TabLayout() {
         tabBarInactiveTintColor: '#999',
         tabBarStyle: {
           backgroundColor: 'rgba(255,255,255,0.95)',
-          height: 70,
+          height: 80,
           borderTopWidth: 0,
           borderTopLeftRadius: 24,
           borderTopRightRadius: 24,
           position: 'absolute',
-          paddingBottom: Platform.OS === 'ios' ? 16 : 10,
+          paddingBottom: Platform.OS === 'ios' ? 20 : 14,
           paddingTop: 10,
         },
       }}
     >
+      {/* Tabs ocultos */}
+      <Tabs.Screen name="login/index" options={{ href: null }} />
+      <Tabs.Screen name="login/localizacion" options={{ href: null }} />
+      <Tabs.Screen name="login/register" options={{ href: null }} />
       {/* Tabs visibles */}
       <Tabs.Screen
-        name="crear/index"
+        name="crear/crear"
         options={{
           title: 'Crear',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="square.and.pencil" color={color} />,
@@ -49,7 +53,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="retos/retos"
+        name="reto/retoGenerado"
         options={{
           title: 'Retos',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
@@ -87,8 +91,8 @@ export default function TabLayout() {
       <Tabs.Screen name="mensajeria/nuevo" options={{ href: null }} />
       <Tabs.Screen name="mensajeria/UsuariosCiudad" options={{ href: null }} />
       <Tabs.Screen name="mensajeria/[id]" options={{ href: null }} />
-      <Tabs.Screen name="retos/destallesReto" options={{ href: null }} />
-      <Tabs.Screen name="crear/seleccion-retos" options={{ href: null }} />
+      <Tabs.Screen name="reto/detalleMisionReto" options={{ href: null }} />
+      <Tabs.Screen name="reto/retoNumero" options={{ href: null }} />
       
     </Tabs>
   );

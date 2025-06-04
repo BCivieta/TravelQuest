@@ -3,11 +3,11 @@ import { View, Text, TouchableOpacity, Alert, StyleSheet, ImageBackground} from 
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import { useUbicacion } from "../../hooks/useUbicacion";
-import { supabase } from "../../lib/supabase";
-import LightWebCesiumMap from "../../components/3d-map/LightWebCesiumMap";
-import { getCurrentUserId } from "../../lib/user";
-import { apiFetch } from "../../lib/api";
+import { useUbicacion } from "../../../hooks/useUbicacion";
+import { supabase } from "../../../lib/supabase";
+import LightWebCesiumMap from "../../../components/3d-map/LightWebCesiumMap";
+import { getCurrentUserId } from "../../../lib/user";
+import { apiFetch } from "../../../lib/api";
 
 // Define the CesiumMapRef interface
 interface CesiumMapRef {
@@ -161,7 +161,7 @@ export default function Geolocalizacion() {
 
       setTimeout(() => {
         // 8. Navegar a la pantalla siguiente
-        router.replace("/(tabs)/crear");
+        router.replace("/(tabs)/crear/crear");
       }, 2000);
     } catch (err) {
       console.error("Error geolocalizando:", err);
@@ -173,7 +173,7 @@ export default function Geolocalizacion() {
   
   return (
     <ImageBackground
-      source={require('../../assets/images/fondo.png')}
+      source={require('../../../assets/images/fondo.png')}
       style={{ flex: 1 }}
       resizeMode="cover"
     >
@@ -191,7 +191,7 @@ export default function Geolocalizacion() {
           <TouchableOpacity
             onPress={handleGeolocalizar}
             disabled={loading}
-            className="bg-white/90 px-6 py-2 rounded-2xl shadow-md"
+            className="bg-white/90 px-6 py-2 rounded-2xl shadow-md mb-16"
             >
             <Text className="text-black font-bold text-lg">
               {loading ? 'Descifrando tu lugar en el mundo…...' : 'Geolocalizarme ahora'}

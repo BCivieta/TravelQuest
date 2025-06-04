@@ -25,7 +25,7 @@ export default function OpcionesDeCrear() {
 
   // Add this function to navigate back to the location screen
   const irALocalizacion = () => {
-    router.push("/login/localizacion");
+    router.push("./(tabs)/login/localizacion");
   };
 
   // Función para navegar a la pantalla para elegir número de misiones

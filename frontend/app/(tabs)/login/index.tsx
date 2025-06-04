@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { useAuth } from "../../hooks/useAuth";
-import { apiFetch } from "../../lib/api";
+import { useAuth } from "../../../hooks/useAuth";
+import { apiFetch } from "../../../lib/api";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import { useEffect } from "react";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../../lib/supabase";
 import * as AuthSession from "expo-auth-session";
 import * as SecureStore from "expo-secure-store";
 
@@ -266,7 +266,7 @@ export default function Login() {
 
    return (
     <ImageBackground
-      source={require('../../assets/images/fondo.png')}
+      source={require('../../../assets/images/fondo.png')}
       style={{ flex: 1 }}
       resizeMode="cover"
     >
@@ -276,7 +276,7 @@ export default function Login() {
       >
         {/* Logo arriba */}
         <Image
-          source={require('../../assets/images/logo.png')}
+          source={require('../../../assets/images/logo.png')}
           style={{ width: 150, height: 120 }}
           className="mb-4"
           resizeMode="contain"
