@@ -64,66 +64,69 @@ export default function MissionList() {
     .sort((a, b) => new Date(b.completed_at ?? '').getTime() - new Date(a.completed_at ?? '').getTime());
 
   const renderMission = (mission: Mission, index: number) => {
-    const isCompleted = mission.status === "completed";
-    const date = isCompleted ? mission.completed_at ?? mission.created_at : mission.created_at;
-    const dateText = isCompleted 
-      ? `Completada el ${new Date(date).toLocaleDateString("es-ES")}` 
-      : `Asignada el ${new Date(date).toLocaleDateString("es-ES")}`;
+  const isCompleted = mission.status === "completed";
+  const date = isCompleted ? mission.completed_at ?? mission.created_at : mission.created_at;
+  const dateText = isCompleted 
+    ? `Completada el ${new Date(date).toLocaleDateString("es-ES")}` 
+    : `Asignada el ${new Date(date).toLocaleDateString("es-ES")}`;
 
   return (
-  <View key={mission.id} className="mb-4">
-    {/* Fondo gris claro envolvente */}
-    <View className="bg-gray-300 p-3 rounded-xl">
-
-      <TouchableOpacity
-        onPress={() => handlePressMission(mission)}
-        className={`p-3 rounded-xl bg-white`}
-        style={{
-          elevation: 6,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.15,
-          shadowRadius: 4,
-        }}
-      >
-        <View className="flex-row justify-between">
-          <View className="flex-1 pr-3">
-            <Text className="font-bold text-base text-black">
-              {mission.title}
-            </Text>
-            <Text className="text-black" numberOfLines={1}>
-              {mission.description}
-            </Text>
-            <Text className="text-xs text-gray-500 mt-1 italic">{dateText}</Text>
-            <View className="mt-2 flex-row items-center">
-              <Text className="text-xs mr-1 text-[#699D81]">
-                Completado
+    <View key={mission.id} className="mb-4">
+      {/* Fondo gris claro envolvente */}
+      <View className="bg-gray-300 p-3 rounded-xl">
+        <TouchableOpacity
+          onPress={() => handlePressMission(mission)}
+          className="p-3 rounded-xl bg-white"
+          style={{
+            elevation: 6,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.15,
+            shadowRadius: 4,
+          }}
+        >
+          <View className="flex-row justify-between">
+            <View className="flex-1 pr-3">
+              <Text className="font-bold text-base text-black">
+                {mission.title}
               </Text>
-              <Ionicons
-                name="checkmark-circle"
-                size={14}
-                color="#699D81"
-              />
-            </View>
-          </View>
+              <Text className="text-black" numberOfLines={1}>
+                {mission.description}
+              </Text>
+              <Text className="text-xs text-gray-500 mt-1 italic">{dateText}</Text>
 
-          {isCompleted && mission.image_url && (
-            <Image
-              source={{ uri: mission.image_url }}
-              style={{
-                width: 60,
-                height: 60,
-                borderRadius: 10,
-                marginLeft: 4,
-              }}
-            />
-          )}
-        </View>
-      </TouchableOpacity>
+              <View className="mt-2 flex-row items-center">
+                <Text
+                  className={`text-xs mr-1 ${isCompleted ? "text-[#699D81]" : "text-yellow-600"}`}
+                >
+                  {isCompleted ? "Completado" : "Pendiente"}
+                </Text>
+                <Ionicons
+                  name={isCompleted ? "checkmark-circle" : "hourglass"}
+                  size={14}
+                  color={isCompleted ? "#699D81" : "#FACC15"}
+                />
+              </View>
+            </View>
+
+            {isCompleted && mission.image_url && (
+              <Image
+                source={{ uri: mission.image_url }}
+                style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: 10,
+                  marginLeft: 4,
+                }}
+              />
+            )}
+          </View>
+        </TouchableOpacity>
+      </View>
     </View>
-  </View>
-);
-  };
+  );
+};
+
 
   return (
   <ImageBackground
