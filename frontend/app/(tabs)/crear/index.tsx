@@ -47,7 +47,7 @@ export default function OpcionesDeCrear() {
       resizeMode="cover"
     >
       {/* Capa blanca translúcida para aclarar imagen */}
-      <View className="flex-1 px-6 pt-12">
+      <View className="flex-1 px-6 mt-8 pt-12">
 
         {/* Botón volver */}
         <TouchableOpacity 

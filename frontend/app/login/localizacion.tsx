@@ -179,7 +179,7 @@ export default function Geolocalizacion() {
     >
       <View className="flex-1  p-4">
 
-        <Text className="text-xl font-bold text-center text-black mb-16 mt-10 bg-white/80 px-4 py-2 rounded-xl">
+        <Text className="text-xl font-bold text-center text-black mb-5 mt-14 bg-white/80 px-4 py-2 rounded-xl">
           🧭 Activa tu ubicación
         </Text>
 
@@ -187,11 +187,11 @@ export default function Geolocalizacion() {
         <LightWebCesiumMap coords={coords} height={"100%"} ref={mapRef} interactive={true} />
         </View>
         
-        <View className="items-center">
+        <View className="items-center mb-10">
           <TouchableOpacity
             onPress={handleGeolocalizar}
             disabled={loading}
-            className="bg-white/90 px-6 py-4 rounded-2xl shadow-md"
+            className="bg-white/90 px-6 py-2 rounded-2xl shadow-md"
             >
             <Text className="text-black font-bold text-lg">
               {loading ? 'Descifrando tu lugar en el mundo…...' : 'Geolocalizarme ahora'}

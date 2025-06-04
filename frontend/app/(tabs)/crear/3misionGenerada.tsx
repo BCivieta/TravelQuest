@@ -187,12 +187,12 @@ useEffect(() => {
         {/* Botón volver */}
         <TouchableOpacity
           onPress={handleBack}
-          className="absolute top-10 left-4 z-10 bg-white/70 rounded-full p-2 shadow-md"
+          className="absolute top-10 mt-5 left-4 z-10 bg-white/70 rounded-full p-2 shadow-md"
         >
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
 
-        <ScrollView className="flex-1 px-6 pb-6">
+        <ScrollView className="flex-1 mt-6  px-6 pb-6">
 
           <View style={{ height: 50 }} />
           {/* Etiqueta de categoría 
@@ -201,21 +201,21 @@ useEffect(() => {
           </View>*/}
 
           {/* Título de misión */}
-          <View className="bg-white/80 p-4 mt-18 rounded-2xl shadow-md mb-4">
+          <View className="bg-white/80 p-4 rounded-2xl shadow-md mb-4">
             <Text className="text-black font-bold text-xl text-center">
               🕵️‍♂️ {title ?? "Misión sin título"}
             </Text>
           </View>
 
           {/* Descripción */}
-          <View className="bg-white/80 p-4 rounded-2xl shadow-md mb-10">
+          <View className="bg-white/80 p-4 rounded-2xl shadow-md mb-4">
             <Text className="text-black text-base leading-relaxed">
               {description ?? "Descripción no disponible"}
             </Text>
           </View>
 
           {/* Área de imagen / carga */}
-          <View className="bg-white/80 rounded-2xl shadow-xl items-center justify-center p-6 mb-10">
+          <View className="bg-white/80 rounded-2xl shadow-xl items-center justify-center p-6 mb-4">
             {imageUri ? (
               <Image
                 source={{ uri: imageUri }}
@@ -227,7 +227,7 @@ useEffect(() => {
 
               
 
-            <View className="flex-row space-x-4">
+            <View className="flex-row space-x-4 mt-2">
               <TouchableOpacity
                 className="bg-white/90 px-4 py-3 rounded-2xl shadow-md me-2"
                 onPress={handleTakePhoto}
@@ -267,7 +267,7 @@ useEffect(() => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="bg-white/80 px-6 py-4 rounded-2xl shadow-md"
+              className="bg-white/80 px-6 py-4 rounded-2xl shadow-md mb-5"
               onPress={handleSaveForLater}
             >
               <View className="flex-row items-center justify-between">

@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { ImageBackground } from "react-native-web";
 
 export default {
   expo: {
@@ -7,7 +8,7 @@ export default {
     slug: "travelquest", // Changed from "myApp" to "travelquest" to match EAS project
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
+    icon: "./assets/images/logo_oscuro.png",
     scheme: "travelquest", // Updated to match slug
     deepLinking: true,
     userInterfaceStyle: "automatic",

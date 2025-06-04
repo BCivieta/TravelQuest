@@ -92,7 +92,7 @@ export default function CreateJournalEntry() {
       router.replace("/(tabs)/crear");
 
       // Trigger achievement check after successful diary entry
-      try {
+      /*try 
         const checkRes = await apiFetch("/achievements/check", {
           method: "POST",
         });
@@ -106,7 +106,7 @@ export default function CreateJournalEntry() {
         }
       } catch (achievementError) {
         console.error("Error calling achievement check endpoint:", achievementError);
-      }
+      }*/
 
     } catch (error) {
       console.error("❌ Error al publicar:", error);
@@ -129,10 +129,10 @@ export default function CreateJournalEntry() {
       style={{ flex: 1 }}
       resizeMode="cover"
     >
-      <View className="flex-1 px-6 pt-12 justify-start">
+      <View className="flex-1 px-6 pt-12 justify-start mt-4">
         {/* Botón volver */}
         <TouchableOpacity
-          onPress={() => router.push("/login/localizacion")}
+          onPress={() => router.push("/(tabs)/crear")}
           className="absolute top-10 left-4 z-10 bg-white/70 rounded-full p-2 shadow-md"
         >
           <Ionicons name="arrow-back" size={24} color="#000" />
