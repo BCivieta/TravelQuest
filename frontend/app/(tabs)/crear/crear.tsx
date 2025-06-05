@@ -20,7 +20,7 @@ export default function OpcionesDeCrear() {
     });
   };
   const irAEditarDiario =()=>{
-    router.push("./crear/2.2entradaDiario");
+    router.push("/(tabs)/crear/2.2entradaDiario");
   };
 
   // Add this function to navigate back to the location screen

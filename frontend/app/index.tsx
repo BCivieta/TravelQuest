@@ -39,6 +39,6 @@ export default function Index() {
   }
 
   /* --- redirección definitiva --- */
-  return <Redirect href={isLoggedIn ? "/crear" : "/login"} />;
+  return <Redirect href={isLoggedIn ? "/(tabs)/crear/crear" : "/(tabs)/login"} />;
 }
 

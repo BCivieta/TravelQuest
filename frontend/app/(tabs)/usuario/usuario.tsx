@@ -368,7 +368,7 @@ export default function Usuario() {
             </TouchableOpacity>
 
             {mostrarMenu && (
-              <View className="absolute top-12 right-0 bg-white/90 rounded-2xl shadow-md z-10 w-56 overflow-hidden">
+              <View className="absolute top-12 right-0 bg-white rounded-2xl shadow-md z-10 w-56 overflow-hidden">
                 <TouchableOpacity
                   onPress={handleVerSobre}
                   className="flex-row items-center px-4 py-3 border-b border-gray-200"

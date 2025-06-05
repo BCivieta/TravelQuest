@@ -272,7 +272,7 @@ export default function Login() {
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        className="flex-1 px-6 justify-center pb-20 items-center"
+        className="flex-1 px-6 mt-20 pb-20 items-center"
       >
         {/* Logo arriba */}
         <Image

@@ -89,7 +89,7 @@ export default function CreateJournalEntry() {
       Alert.alert("¡Éxito!", "Tu entrada de diario se ha guardado correctamente.");
       setDescription("");
       setImageUri(null);
-      router.replace("/(tabs)/crear");
+      router.replace("/(tabs)/crear/crear");
 
       // Trigger achievement check after successful diary entry
       /*try 
@@ -132,7 +132,7 @@ export default function CreateJournalEntry() {
       <View className="flex-1 px-6 pt-12 justify-start mt-4">
         {/* Botón volver */}
         <TouchableOpacity
-          onPress={() => router.push("/(tabs)/crear")}
+          onPress={() => router.push("/(tabs)/crear/crear")}
           className="absolute top-10 left-4 z-10 bg-white/70 rounded-full p-2 shadow-md"
         >
           <Ionicons name="arrow-back" size={24} color="#000" />
