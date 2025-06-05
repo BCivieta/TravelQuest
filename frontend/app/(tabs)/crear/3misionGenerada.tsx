@@ -60,7 +60,7 @@ export default function Mision() {
         },
       });
     } else {
-      router.replace("/(tabs)/crear");
+      router.replace("/(tabs)/crear/crear");
     }
     } catch (err) {
       console.error(err);

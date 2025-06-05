@@ -95,7 +95,7 @@ export default function HistoriaMision() {
         {/* Botón dentro de la card */}
         <TouchableOpacity
           className="bg-white px-6 py-4 mt-5 rounded-2xl border border-gray-200 flex-row items-center justify-center"
-          onPress={() => router.replace("/(tabs)/crear")}
+          onPress={() => router.replace("/(tabs)/crear/crear")}
           style={{
             elevation: 6,
             shadowColor: '#000',

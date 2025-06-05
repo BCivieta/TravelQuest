@@ -29,7 +29,7 @@ export default function MisionCompletada() {
   };
 
   const handleExplorar = () => {
-    router.replace("/(tabs)/crear");
+    router.replace("/(tabs)/crear/crear");
   };
 return (
     <ImageBackground
