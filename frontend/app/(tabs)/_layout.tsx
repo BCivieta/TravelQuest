@@ -26,9 +26,9 @@ export default function TabLayout() {
       }}
     >
       {/* Tabs ocultos */}
-      <Tabs.Screen name="login/index" options={{ href: null }} />
-      <Tabs.Screen name="login/localizacion" options={{ href: null }} />
-      <Tabs.Screen name="login/register" options={{ href: null }} />
+      <Tabs.Screen name="login/index" options={{ href: null, tabBarStyle: { display: 'none' }, }} />
+      <Tabs.Screen name="login/localizacion" options={{ href: null, tabBarStyle: { display: 'none' }, }} />
+      <Tabs.Screen name="login/register" options={{ href: null, tabBarStyle: { display: 'none' }, }} />
       {/* Tabs visibles */}
       <Tabs.Screen
         name="crear/crear"
@@ -56,7 +56,7 @@ export default function TabLayout() {
         name="reto/retoGenerado"
         options={{
           title: 'Retos',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="map.fill" color={color} />,
         }}
       />
       <Tabs.Screen
