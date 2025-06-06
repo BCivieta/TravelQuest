@@ -168,7 +168,7 @@ export default function RetoNumero() {
       style={{ flex: 1 }}
       resizeMode="cover"
     >
-      <View className="flex-1 px-6 pt-12 justify-start">
+      <View className="flex-1 px-6 pt-12 justify-start mt-10">
         <View className="bg-white/80 px-4 py-2 rounded-xl shadow-md self-start mb-10 flex-row items-center gap-2">
           <Text className="text-black text-lg font-semibold">¿Cuántas misiones quieres?</Text>
           <Text className="text-black text-lg">🗺️</Text>

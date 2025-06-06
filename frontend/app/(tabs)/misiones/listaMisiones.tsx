@@ -153,14 +153,18 @@ export default function MissionList() {
         </View>
 
         {/* Tarjeta misiones completadas */}
-        {completed.length > 0 && (
-          <View className="bg-white/95 p-4 rounded-2xl shadow-md">
-            <Text className="text-black font-bold text-base mb-4">
-              ✅ Misiones completadas ({completed.length})
-            </Text>
-            {completed.map((m, i) => renderMission(m, i))}
-          </View>
-        )}
+        <View className="bg-white/95 p-4 rounded-2xl shadow-md">
+          <Text className="text-black font-bold text-base mb-4">
+            ✅ Misiones completadas ({completed.length})
+          </Text>
+
+          {completed.length > 0 ? (
+            completed.map((m, i) => renderMission(m, i))
+          ) : (
+            <Text className="text-gray-500 italic">Aún no has completado ninguna misión.</Text>
+          )}
+        </View>
+
       </ScrollView>
     </View>
   </ImageBackground>

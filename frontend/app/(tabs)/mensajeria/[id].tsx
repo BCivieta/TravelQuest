@@ -1389,7 +1389,7 @@ export default function ChatScreen() {
     style={{ flex: 1 }}
     resizeMode="cover"
     >
-        <View style={{ flex: 1}}>
+        <View className='mt-10' style={{ flex: 1}}>
           {/* Header */}
           <View style={{ 
             flexDirection: 'row', 
@@ -1542,7 +1542,7 @@ export default function ChatScreen() {
           </View>
 
           {/* Fixed Input Bar - Height: 60 ensures visibility */}
-          <View style={{ 
+          <View className='mb-5' style={{ 
             height: 70, 
             borderTopWidth: 2, 
             borderColor: '#403796', 

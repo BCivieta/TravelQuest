@@ -59,6 +59,14 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="map.fill" color={color} />,
         }}
       />
+
+       <Tabs.Screen
+        name="mensajeria/index"
+        options={{
+          title: 'Mensajes',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bubble.left.and.bubble.right.fill" color={color} />,
+        }}
+      />
       <Tabs.Screen
         name="usuario/usuario"
         options={{
@@ -66,13 +74,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="mensajeria/index"
-        options={{
-          title: 'Mensajes',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bubble.left.and.bubble.right.fill" color={color} />,
-        }}
-      />
+     
 
       {/* Tabs ocultos */}
       <Tabs.Screen name="crear/2dificultad" options={{ href: null }} />

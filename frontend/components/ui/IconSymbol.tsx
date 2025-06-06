@@ -19,6 +19,7 @@ const MAPPING = {
   'square.and.pencil': 'edit-note',
   'airplane': 'flight',
   'bubble.left.and.bubble.right.fill': 'chat',
+  'map.fill': 'map'
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
