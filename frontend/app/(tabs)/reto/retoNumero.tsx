@@ -62,6 +62,8 @@ export default function RetoNumero() {
   const seleccionarCantidad = async (cantidad: number) => {
     if (!userId) return Alert.alert("Error", "Usuario no identificado.");
     if (!cityId) return Alert.alert("Error", "Ciudad no especificada.");
+     setLoading(true);               // ✅ ACTIVAMOS LA CARGA
+     setLoadingOption(cantidad);     // 🔄 Spinner en el botón
 
     try {
       const res = await apiFetch("/retos/generar", {
@@ -75,6 +77,9 @@ export default function RetoNumero() {
       });
 
       if (res.status === 409) {
+        // Detenemos loading momentáneamente para mostrar alerta
+        setLoading(false);
+
         Alert.alert(
           "Reto ya existente",
           "Ya tienes un reto activo. Si generas uno nuevo, el anterior se eliminará. ¿Deseas continuar?",
@@ -180,6 +185,19 @@ export default function RetoNumero() {
           <BotonReto cantidad={15} label="El reto definitivo" emoji="🔥🔥🔥" />
         </View>
       </View>
+      {/* Overlay de carga */}
+        {loading && (
+          <View className="absolute top-0 left-0 right-0 bottom-0 bg-black/60 items-center justify-center z-50 p-10">
+            <Text className="text-white text-xl font-semibold text-center mb-4">
+              Generando reto...
+            </Text>
+            <Text className="text-white text-base text-center">
+              Esto puede tardar unos segundos
+            </Text>
+            {/* Opcional */}
+            <ActivityIndicator size="large" color="#fff" className="mt-6" />
+          </View>
+        )}
     </ImageBackground>
   );
 }

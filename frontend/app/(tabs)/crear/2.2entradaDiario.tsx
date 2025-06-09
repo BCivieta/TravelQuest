@@ -70,12 +70,14 @@ export default function CreateJournalEntry() {
 
       if (imageUri) {
         const fileName = imageUri.split("/").pop() || `photo-${Date.now()}.jpg`;
-        const fileType = fileName.split(".").pop();
+        //const fileType = fileName.split(".").pop();
+        const fileType = fileName.includes(".") ? fileName.split(".").pop() : "jpg";
+
 
         formData.append("image", {
           uri: Platform.OS === "ios" ? imageUri.replace("file://", "") : imageUri,
           name: fileName,
-          type: `image/${fileType}`,
+          type: `image/${fileType || "jpeg" }`,
         } as any);
       }
 
@@ -106,11 +108,18 @@ export default function CreateJournalEntry() {
         }
       } catch (achievementError) {
         console.error("Error calling achievement check endpoint:", achievementError);
-      }*/
+      }
 
     } catch (error) {
       console.error("❌ Error al publicar:", error);
       Alert.alert("Error", "No se pudo guardar la entrada.");
+    } finally {
+      setLoading(false);
+    }*/
+    } catch (err) {
+    const error = err as Error;
+    console.error("❌ Error al publicar:", error);
+    Alert.alert("Error", error.message || "No se pudo guardar la entrada.");
     } finally {
       setLoading(false);
     }

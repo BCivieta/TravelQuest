@@ -113,7 +113,7 @@ export default function EditarAvatar() {
       }
   
       Alert.alert("Avatar guardado", "Tu avatar ha sido actualizado.");
-      router.back(); // volver a editar perfil
+      router.push("/(tabs)/usuario/editar"); // volver a editar perfil
     } catch (err) {
       Alert.alert("Error", "No se pudo conectar con el servidor.");
       console.error("Error guardando avatar:", err);
@@ -128,7 +128,7 @@ export default function EditarAvatar() {
       <View className="flex-1 bg-white/20 pt-14 px-6">
         {/* Flecha para volver */}
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => router.push("/(tabs)/usuario/editar:")}
           className="absolute top-12 left-4 z-10 bg-white rounded-full p-1"
         >
           <Ionicons name="arrow-back" size={24} color="#000" />
