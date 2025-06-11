@@ -1,60 +1,84 @@
-# TravelQuest
+<h1 align="center">🌍 TravelQuest</h1>
 
-**Desarrollado por:**
-- **Iván Gallego** 👨‍💻
-- **Blanca Civieta** 👩‍💻
-- **Patxi** 👨‍💻
-- **Iván Sala** 👨‍💻
+<p align="center">
+  Una app móvil que convierte cada viaje en una aventura únicadiferente a través de misiones generadas por IA.
+</p>
 
-## Descripción del Proyecto
+<br/>
 
-TravelQuest es una aplicación móvil diseñada para que los viajeros exploren ciudades de manera interactiva a través de misiones generadas por inteligencia artificial. Los usuarios pueden seleccionar una ciudad, la duración de su viaje y misiones que desean completar. La aplicación genera retos personalizados basados en la historia, cultura y curiosidades de cada ciudad, permitiendo a los usuarios documentar sus experiencias en un diario de viaje digital.
+## 👩‍💻 Equipo de Desarrollo
 
-## Objetivos del Proyecto
+| Nombre           | Rol                            |
+|------------------|---------------------------------|
+| **Blanca Civieta** | 👩‍💻 Team Leader y desarrolladora Full Stack |
+| **Iván Gallego**   | 👨‍💻 Desarrollador Full Stack              |
+| **Patxi Bercial**  | 👨‍💻 Desarrollador Full Stack              |
+| **Iván Sala**      | 👨‍💻 Desarrollador Full Stack              |
 
-- Desarrollar una aplicación interactiva que motive a los viajeros a explorar ciudades mediante retos personalizados.
-- Permitir el registro de experiencias a través de un diario de viaje digital.
-- Crear una interfaz amigable y accesible para una experiencia fluida y atractiva.
-- Diseñar una estructura escalable que facilite futuras mejoras y expansiones.
+---
 
-## Tecnologías Utilizadas
+## ✨ Descripción del Proyecto
 
-### Frontend
-- **Framework**: React Native con Expo.
-- **Estilos**: Tailwind CSS.
-- **Manejo de estado**: Redux o Zustand.
-- **Integración opcional**: Google Maps API para visualización de ubicaciones.
+**TravelQuest** es una aplicación móvil que permite a los viajeros descubrir ciudades mediante **misiones interactivas generadas por inteligencia artificial**. Los usuarios eligen su destino, duración del viaje y eligen retos personalizados, documentando la experiencia en un **diario de viaje digital** y conexión con otros viajeros gracias a **su chat en tiempo real**.
 
-### Backend
-- **Lenguaje**: Node.js y Python.
-- **Autenticación**: Supabase Auth.
-- **Base de datos**: PostgreSQL (Supabase).
-- **Almacenamiento de imágenes**: Supabase Storage.
+---
 
-### Inteligencia Artificial
-- **Generación de misiones**: OpenAI ChatGPT API.
-- **Validación de imágenes **: Google Vision AI.
+## 🎯 Objetivos
 
-## Características Principales
+- 🧭 Motivar a los viajeros a explorar de forma original.
+- 📓 Permitir registrar experiencias personales.
+- 🎨 Diseñar una app intuitiva y escalable.
+- 🚀 Facilitar futuras mejoras y expansión.
 
-1. **Generación de Misiones**:
-   - Retos personalizados basados en la historia, cultura y curiosidades de cada ciudad.
-   - Clasificación de misiones por dificultad (fácil, medio, difícil).
+---
 
-2. **Diario de Viaje**:
-   - Subida de fotos y descripciones detalladas.
-   - Organización de recuerdos por ciudades.
-   - Notas personales y acceso al historial de viajes.
+## 🛠️ Tecnologías Utilizadas
 
-3. **Validación de Misiones (Opcional)**:
-   - Validación automática mediante Google Vision AI.
+### 📱 Frontend
+- **React Native** (con Expo)
+- **Tailwind CSS**
+- **Zustand / Redux**
+- **Google Maps API** 
 
-4. **Características Adicionales **:
-   - Gamificación: Logros y niveles según misiones cumplidas y viajes realizados.
-   - Ranking de viajeros, global y personal con amigos.
-   - Mensajería para contactar con usuarios que estén en tu misma ciudad.
+### 🧠 Inteligencia Artificial
+- **OpenAI ChatGPT API** (misiones)
+- **Google Vision AI** (validación de imágenes)
 
-## Licencia
+### 🔙 Backend
+- **Node.js** y **Python**
+- **Supabase Auth** (autenticación)
+- **PostgreSQL** (Base de datos)
+- **Supabase Storage** (Imágenes)
+
+---
+
+## 🚀 Funcionalidades Destacadas
+
+### 🎯 Misiones
+- Retos personalizados según ciudad y dificultad.
+- Ruta de misiones.
+
+### 📔 Diario de Viaje
+- Subida de fotos y descripciones por ciudad.
+- Organización cronológica de experiencias.
+
+### 🔍 Validación de Misiones
+- Revisión automática con Google Vision AI.
+
+### 🏆 Gamificación
+- Logros, niveles y ranking global.
+- Ranking personal con amigos.
+
+
+### 🏆 Mensajeria
+- Conexión con viajeros que exploran la misma ciudad.
+---
+
+## 📄 Licencia
 
 Este proyecto está bajo la licencia [MIT](LICENSE).
+
+---
+
+
 

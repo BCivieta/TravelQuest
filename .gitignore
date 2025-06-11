@@ -45,3 +45,15 @@ Thumbs.db
 config/fourth-ability-455408-h2-1e611bfbfec8.json
 config/fourth-ability.json
 config/google-vision-key.json
+
+# Build output
+build/
+dist/
+
+*.log
+*.bak
+*.tmp
+*.orig
+*.lock
+
+*.code-workspace
